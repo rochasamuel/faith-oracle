@@ -55,9 +55,9 @@ create table if not exists public.reports (
   period_end         date                not null,
   status             report_status       not null default 'concluido',
   -- Snapshot financeiro apurado no momento da geração.
-  total_entradas     numeric(12, 2)      not null default 0,
-  total_saidas       numeric(12, 2)      not null default 0,
-  balance            numeric(12, 2)      not null default 0,
+  total_entradas     integer             not null default 0,
+  total_saidas       integer             not null default 0,
+  balance            integer             not null default 0,
   transactions_count int                 not null default 0,
   notes              text,
   -- Soft delete: preenchidos ao invalidar o relatório.
@@ -75,7 +75,7 @@ create table if not exists public.reports (
 comment on table  public.reports                is 'Relatórios financeiros gerados (mensais ou anuais).';
 comment on column public.reports.status         is 'processando | concluido | erro | invalidado (soft delete).';
 comment on column public.reports.invalidated_at is 'Data da invalidação (soft delete). Nulo enquanto válido.';
-comment on column public.reports.balance        is 'Saldo apurado (total_entradas - total_saidas) no período.';
+comment on column public.reports.balance        is 'Saldo apurado em centavos (total_entradas - total_saidas) no período.';
 
 create index if not exists reports_reference_idx  on public.reports (reference_year desc, reference_month desc);
 create index if not exists reports_status_idx      on public.reports (status);

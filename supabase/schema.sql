@@ -30,6 +30,7 @@ begin
     create type transaction_category as enum (
       'dizimos',
       'ofertas',
+      'doacoes',
       'ajuda_social',
       'eventos',
       'despesas_fixas',
@@ -49,8 +50,8 @@ create table if not exists public.transactions (
   id          uuid                  primary key default gen_random_uuid(),
   type        transaction_type      not null,
   category    transaction_category  not null,
-  -- Valor sempre positivo, em reais. O sinal é dado pela coluna `type`.
-  amount      numeric(12, 2)        not null check (amount > 0),
+  -- Valor sempre positivo, em CENTAVOS (inteiro). O sinal é dado pela coluna `type`.
+  amount      integer               not null check (amount > 0),
   -- Data do fato gerador (o que o usuário informa em dd/mm/yyyy).
   occurred_at date                  not null,
   notes       text,
@@ -60,7 +61,7 @@ create table if not exists public.transactions (
 
 comment on table  public.transactions             is 'Lançamentos financeiros da igreja (entradas e saídas).';
 comment on column public.transactions.type        is 'entrada = receita; saida = despesa.';
-comment on column public.transactions.amount      is 'Valor absoluto em reais (sempre > 0). O sinal vem de `type`.';
+comment on column public.transactions.amount      is 'Valor absoluto em centavos (sempre > 0). O sinal vem de `type`.';
 comment on column public.transactions.occurred_at is 'Data do lançamento informada pelo usuário.';
 
 -- Índices para a listagem (ordenada por data) e filtros futuros.
