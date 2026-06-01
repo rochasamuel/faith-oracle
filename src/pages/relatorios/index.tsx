@@ -6,6 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { useReports } from "@/features/relatorios/hooks"
 import { GenerateReportDialog } from "@/features/relatorios/generate-report-dialog"
+import { ReconciliationDialog } from "@/features/relatorios/reconciliation-dialog"
 import { ReportTable } from "@/features/relatorios/report-table"
 import { ReportFilters } from "@/features/relatorios/report-filters"
 import {
@@ -53,7 +54,10 @@ export default function RelatoriosPage() {
             Relatórios financeiros gerados por período.
           </p>
         </div>
-        <GenerateReportDialog />
+        <div className="flex items-center gap-2">
+          <ReconciliationDialog />
+          <GenerateReportDialog />
+        </div>
       </div>
 
       {!isEmpty && (
