@@ -1,5 +1,6 @@
 import { supabase } from "@/lib/supabase"
-import { SALDO_ABERTURA } from "@/config/church"
+import { getLatestCheckpointAsOf } from "@/api/balance-checkpoints"
+import { balanceFrom } from "@/features/financeiro/balance"
 import type {
   TransactionCategory,
   TransactionType,
@@ -77,19 +78,32 @@ export async function deleteTransaction(id: string): Promise<void> {
 }
 
 /**
- * Saldo (entradas − saídas) de todos os lançamentos anteriores a `dateISO`,
- * partindo do saldo de abertura (caixa anterior ao uso do sistema).
- * Usado como "saldo inicial" do relatório (= saldo final do período anterior).
+ * Saldo no INÍCIO de `dateISO` (exclusivo): base do marco mais recente
+ * (<= data) + lançamentos da data do marco até `dateISO` (exclusivo).
+ * Sem marco anterior, base = 0. É o "saldo inicial" do relatório.
  */
 export async function getBalanceBefore(dateISO: string): Promise<number> {
-  const { data, error } = await supabase
-    .from(TABLE)
-    .select("type, amount")
-    .lt("occurred_at", dateISO)
+  return balanceUpTo(dateISO, false)
+}
 
+/**
+ * Saldo ao FIM de `dateISO` (inclusive): inclui os lançamentos do próprio dia.
+ * Usado na conciliação (comparar com o saldo informado do banco na data).
+ */
+export async function getBalanceAsOf(dateISO: string): Promise<number> {
+  return balanceUpTo(dateISO, true)
+}
+
+/** Núcleo: base do marco + soma dos lançamentos até `dateISO` (centavos). */
+async function balanceUpTo(dateISO: string, inclusive: boolean): Promise<number> {
+  const checkpoint = await getLatestCheckpointAsOf(dateISO)
+  const base = checkpoint?.amount ?? 0
+
+  let q = supabase.from(TABLE).select("type, amount")
+  if (checkpoint) q = q.gte("occurred_at", checkpoint.checkpoint_date)
+  q = inclusive ? q.lte("occurred_at", dateISO) : q.lt("occurred_at", dateISO)
+
+  const { data, error } = await q
   if (error) throw error
-  return (data ?? []).reduce(
-    (sum, t) => sum + (t.type === "entrada" ? t.amount : -t.amount),
-    SALDO_ABERTURA
-  )
+  return balanceFrom(base, data ?? [])
 }

@@ -23,11 +23,3 @@ export const AGGREGATED_CATEGORIES: TransactionCategory[] = [
   "ofertas",
   "doacoes",
 ]
-
-/**
- * Saldo de caixa (em reais) que a igreja já possuía ANTES do primeiro lançamento
- * registrado no sistema. É somado ao saldo inicial de todos os relatórios, então
- * basta definir uma vez aqui: os meses seguintes encadeiam o saldo automaticamente.
- * Edite com o valor real do caixa no momento em que começou a usar o sistema.
- */
-export const SALDO_ABERTURA = 0
