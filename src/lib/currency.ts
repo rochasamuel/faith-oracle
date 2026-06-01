@@ -1,8 +1,6 @@
 /**
- * Helpers de moeda em Real (BRL).
- *
- * Internamente o formulário trabalha com centavos (inteiro) para evitar erros
- * de ponto flutuante; ao enviar para o banco convertemos para reais (number).
+ * Helpers de moeda em Real (BRL). Tudo trabalha em CENTAVOS (inteiro) para
+ * evitar erros de ponto flutuante — inclusive o que é persistido no banco.
  */
 
 const brl = new Intl.NumberFormat("pt-BR", {
@@ -10,9 +8,14 @@ const brl = new Intl.NumberFormat("pt-BR", {
   currency: "BRL",
 })
 
-/** Formata um valor em reais para exibição: 1234.5 -> "R$ 1.234,50". */
-export function formatBRL(amountInReais: number): string {
-  return brl.format(amountInReais)
+/** Formata centavos para exibição: 123450 -> "R$ 1.234,50". */
+export function formatBRL(cents: number): string {
+  return brl.format(cents / 100)
+}
+
+/** Alias histórico: idêntico a formatBRL (recebe centavos). */
+export function formatCentsToBRL(cents: number): string {
+  return formatBRL(cents)
 }
 
 /** Extrai apenas os dígitos de uma string e os interpreta como centavos. */
@@ -20,14 +23,4 @@ export function digitsToCents(value: string): number {
   const digits = value.replace(/\D/g, "")
   if (!digits) return 0
   return Number.parseInt(digits, 10)
-}
-
-/** Formata centavos como string monetária para o input: 123450 -> "R$ 1.234,50". */
-export function formatCentsToBRL(cents: number): string {
-  return brl.format(cents / 100)
-}
-
-/** Converte centavos para reais (number) para persistência: 123450 -> 1234.5. */
-export function centsToReais(cents: number): number {
-  return cents / 100
 }

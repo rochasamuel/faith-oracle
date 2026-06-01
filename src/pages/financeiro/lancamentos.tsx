@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { cn } from "@/lib/utils"
-import { centsToReais, formatBRL } from "@/lib/currency"
+import { formatBRL } from "@/lib/currency"
 import { useTransactions } from "@/features/financeiro/hooks"
 import { TransactionTable } from "@/features/financeiro/transaction-table"
 import { TransactionFilters } from "@/features/financeiro/transaction-filters"
@@ -35,8 +35,8 @@ function applyFilters(
   transactions: Transaction[],
   filters: TransactionFiltersState
 ): Transaction[] {
-  const min = filters.minCents > 0 ? centsToReais(filters.minCents) : null
-  const max = filters.maxCents > 0 ? centsToReais(filters.maxCents) : null
+  const min = filters.minCents > 0 ? filters.minCents : null
+  const max = filters.maxCents > 0 ? filters.maxCents : null
   const from = filters.dateRange?.from
   const to = filters.dateRange?.to
 

@@ -21,7 +21,6 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { centsToReais } from "@/lib/currency"
 import { dateToISO, formatDateBR } from "@/lib/date"
 import { CurrencyInput } from "@/features/financeiro/currency-input"
 import {
@@ -94,7 +93,7 @@ export function TransactionForm() {
       {
         type: result.data!.type,
         category: result.data!.category,
-        amount: centsToReais(result.data!.amountCents),
+        amount: result.data!.amountCents,
         occurred_at: dateToISO(date!),
         notes: result.data!.notes ?? null,
       },
