@@ -1,8 +1,10 @@
 import * as React from "react"
-import { ScaleIcon } from "lucide-react"
+import { ptBR } from "date-fns/locale"
+import { CalendarIcon, ScaleIcon } from "lucide-react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Dialog,
   DialogContent,
@@ -12,38 +14,46 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { cn } from "@/lib/utils"
 import { CurrencyInput } from "@/features/financeiro/currency-input"
 import { formatBRL } from "@/lib/currency"
-import { dateToISO } from "@/lib/date"
+import { dateToISO, formatDateBR } from "@/lib/date"
 import { useCreateReconciliation } from "@/features/relatorios/use-reconciliations"
-
-interface ReconciliationDialogProps {
-  /** Data inicial sugerida (ISO yyyy-mm-dd); padrão é hoje. */
-  defaultDate?: string
-}
 
 /**
  * Conciliação: informa o saldo real do banco numa data; a diferença para o
  * saldo do sistema vira um lançamento de ajuste (doação em entrada / "outros"
  * em saída).
  */
-export function ReconciliationDialog({ defaultDate }: ReconciliationDialogProps) {
+export function ReconciliationDialog() {
   const [open, setOpen] = React.useState(false)
-  const [date, setDate] = React.useState(defaultDate ?? dateToISO(new Date()))
+  const [date, setDate] = React.useState<Date | undefined>(new Date())
+  const [dateOpen, setDateOpen] = React.useState(false)
   const [amountCents, setAmountCents] = React.useState(0)
+  const [dateError, setDateError] = React.useState(false)
   const create = useCreateReconciliation()
 
   function reset() {
-    setDate(defaultDate ?? dateToISO(new Date()))
+    setDate(new Date())
     setAmountCents(0)
+    setDateError(false)
   }
 
   async function handleConfirm() {
+    if (!date) {
+      setDateError(true)
+      return
+    }
+    setDateError(false)
     try {
       const result = await create.mutateAsync({
-        reconciled_at: date,
+        reconciled_at: dateToISO(date),
         informed_balance: amountCents,
       })
       const diff = result.difference
@@ -83,13 +93,39 @@ export function ReconciliationDialog({ defaultDate }: ReconciliationDialogProps)
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="rec-date">Data</Label>
-            <Input
-              id="rec-date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
+            <Label>Data</Label>
+            <Popover open={dateOpen} onOpenChange={setDateOpen}>
+              <PopoverTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    aria-invalid={dateError}
+                    className={cn(
+                      "h-9 w-full justify-start gap-2 font-normal",
+                      !date && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="size-4" />
+                    {date ? formatDateBR(date) : "Selecione uma data"}
+                  </Button>
+                }
+              />
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(value) => {
+                    setDate(value)
+                    setDateOpen(false)
+                  }}
+                  locale={ptBR}
+                  autoFocus
+                />
+              </PopoverContent>
+            </Popover>
+            {dateError && (
+              <p className="text-xs text-destructive">Selecione uma data.</p>
+            )}
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="rec-amount">Saldo real no banco</Label>
