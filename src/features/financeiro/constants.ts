@@ -1,0 +1,39 @@
+/**
+ * Domínio do módulo Financeiro: tipos, categorias e seus rótulos.
+ * Os valores (slugs) precisam casar com os enums definidos em supabase/schema.sql.
+ */
+
+export type TransactionType = "entrada" | "saida"
+
+export type TransactionCategory =
+  | "dizimos"
+  | "ofertas"
+  | "ajuda_social"
+  | "eventos"
+  | "despesas_fixas"
+  | "missoes"
+  | "manutencao"
+  | "construcao"
+  | "outros"
+
+export const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
+  entrada: "Entrada",
+  saida: "Saída",
+}
+
+export const TRANSACTION_CATEGORY_LABELS: Record<TransactionCategory, string> = {
+  dizimos: "Dízimos",
+  ofertas: "Ofertas",
+  ajuda_social: "Ajuda social",
+  eventos: "Eventos",
+  despesas_fixas: "Despesas fixas",
+  missoes: "Missões",
+  manutencao: "Manutenção",
+  construcao: "Construção",
+  outros: "Outros",
+}
+
+/** Lista de categorias pronta para popular o <Select>. */
+export const TRANSACTION_CATEGORIES = (
+  Object.keys(TRANSACTION_CATEGORY_LABELS) as TransactionCategory[]
+).map((value) => ({ value, label: TRANSACTION_CATEGORY_LABELS[value] }))
