@@ -18,6 +18,7 @@ export interface Report {
   balance: number
   transactions_count: number
   notes: string | null
+  conferred_at: string | null // ISO yyyy-mm-dd; dia da conferência (PDF). Nulo em relatórios antigos.
   invalidated_at: string | null
   invalidated_reason: string | null
   created_at: string
@@ -38,6 +39,7 @@ export interface NewReport {
   balance: number
   transactions_count: number
   notes?: string | null
+  conferred_at?: string | null
 }
 
 const TABLE = "reports"

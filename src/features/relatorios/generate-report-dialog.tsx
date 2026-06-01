@@ -71,6 +71,10 @@ export function GenerateReportDialog() {
   const [month, setMonth] = React.useState<number | null>(null)
   const [customPeriod, setCustomPeriod] = React.useState(false)
   const [computing, setComputing] = React.useState(false)
+  const [conferredAt, setConferredAt] = React.useState<Date | undefined>(
+    new Date()
+  )
+  const [conferredAtOpen, setConferredAtOpen] = React.useState(false)
 
   const yearOptions = React.useMemo(() => buildYearOptions(), [])
   const monthOptions = React.useMemo(
@@ -91,6 +95,7 @@ export function GenerateReportDialog() {
     setCustomPeriod(false)
     setNotes("")
     setPeriodError(null)
+    setConferredAt(new Date())
   }
 
   /** Valida e resolve o período conforme o tipo de relatório. */
@@ -145,6 +150,10 @@ export function GenerateReportDialog() {
 
     const period = resolvePeriod()
     if (!period) return
+    if (!conferredAt) {
+      setPeriodError("Selecione a data de conferência.")
+      return
+    }
     setPeriodError(null)
 
     setComputing(true)
@@ -174,6 +183,7 @@ export function GenerateReportDialog() {
           balance: totalEntradas - totalSaidas,
           transactions_count: transactions.length,
           notes: notes.trim() || null,
+          conferred_at: dateToISO(conferredAt),
         },
         {
           onSuccess: () => {
@@ -373,6 +383,45 @@ export function GenerateReportDialog() {
               )}
             </div>
           )}
+
+          <div className="flex flex-col gap-2">
+            <Label>Data de conferência</Label>
+            <Popover open={conferredAtOpen} onOpenChange={setConferredAtOpen}>
+              <PopoverTrigger
+                render={
+                  <Button
+                    variant="outline"
+                    aria-invalid={!conferredAt && !!periodError}
+                    className={cn(
+                      "h-9 w-full justify-start gap-2 font-normal",
+                      !conferredAt && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="size-4" />
+                    {conferredAt
+                      ? formatDateBR(conferredAt)
+                      : "Selecione uma data"}
+                  </Button>
+                }
+              />
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={conferredAt}
+                  onSelect={(value) => {
+                    setConferredAt(value)
+                    setConferredAtOpen(false)
+                    setPeriodError(null)
+                  }}
+                  locale={ptBR}
+                  autoFocus
+                />
+              </PopoverContent>
+            </Popover>
+            {!conferredAt && periodError && (
+              <p className="text-xs text-destructive">{periodError}</p>
+            )}
+          </div>
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="report-notes">Observação (opcional)</Label>

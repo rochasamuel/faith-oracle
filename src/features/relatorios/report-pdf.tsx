@@ -299,6 +299,9 @@ function SummaryRow({
 export interface ReportDocumentProps {
   report: Report
   summary: ReportSummary
+  /** Dia da conferência exibido no PDF ("Conferido dia"). */
+  conferredAt: Date
+  /** Momento real da geração do PDF (download). Disponível para uso futuro. */
   generatedAt: Date
   church: ChurchView
 }
@@ -306,7 +309,7 @@ export interface ReportDocumentProps {
 export function ReportDocument({
   report,
   summary,
-  generatedAt,
+  conferredAt,
   church,
 }: ReportDocumentProps) {
   const invalidated = report.status === "invalidado"
@@ -392,7 +395,7 @@ export function ReportDocument({
         </View>
 
         <View style={styles.footer}>
-          <Text>Conferido dia {formatDateBR(generatedAt)}</Text>
+          <Text>Conferido dia {formatDateBR(conferredAt)}</Text>
           <View style={styles.footerLine}>
             <Text>Quantidade de membros: {church.quantidadeMembros}</Text>
             <Text>Quantidade de obreiros: {church.quantidadeObreiros}</Text>

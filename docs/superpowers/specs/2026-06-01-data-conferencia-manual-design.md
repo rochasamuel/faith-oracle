@@ -51,18 +51,29 @@ comment on column public.reports.conferred_at is
 - Em `handleGenerate`, validar que `conferredAt` está definido; incluir
   `conferred_at: dateToISO(conferredAt)` no payload de `createReport.mutate`.
 
-### PDF / download — `src/features/relatorios/report-table.tsx`
+### PDF — `src/features/relatorios/report-pdf.tsx`
 
-- No `handleDownload`, trocar `generatedAt: new Date()` por:
+`generatedAt` (o "quando o PDF foi gerado") e o dia da conferência ("Conferido dia") são
+conceitos distintos e não devem ser sobrecarregados num único prop.
+
+- `ReportDocumentProps` ganha um prop dedicado `conferredAt: Date` (dia da conferência) além
+  do `generatedAt: Date` (momento real da geração/download).
+- A linha *"Conferido dia {data}"* passa a usar `conferredAt`.
+- `generatedAt` permanece no tipo (preenchido com `now` no download), disponível para uso
+  futuro; não é desestruturado no componente para não violar `noUnusedParameters`.
+
+### Download — `src/features/relatorios/report-table.tsx`
+
+- No `handleDownload`, passar os dois props:
 
 ```ts
-generatedAt: parseISO(report.conferred_at ?? report.created_at)
+conferredAt: parseISO(report.conferred_at ?? report.created_at),
+generatedAt: new Date(),
 ```
 
-  Ou seja: usa `conferred_at` quando existir; senão **fallback para `created_at` do registro**
-  (nunca `new Date()` no caminho de download). Importar `parseISO` de `date-fns`.
-
-- `report-pdf.tsx` permanece inalterado (já recebe `generatedAt: Date`).
+  `conferredAt` usa `conferred_at` quando existir; senão **fallback para `created_at` do
+  registro** (nunca `new Date()`). `generatedAt` é o momento real do download.
+  Importar `parseISO` de `date-fns`.
 
 ## Fora de escopo
 
@@ -75,7 +86,8 @@ generatedAt: parseISO(report.conferred_at ?? report.created_at)
 | `supabase/reports.sql` | nova coluna `conferred_at` |
 | `src/api/reports.ts` | campo em `Report` e `NewReport` |
 | `src/features/relatorios/generate-report-dialog.tsx` | campo datepicker + payload |
-| `src/features/relatorios/report-table.tsx` | `generatedAt` a partir de `conferred_at ?? created_at` |
+| `src/features/relatorios/report-pdf.tsx` | novo prop `conferredAt`; "Conferido dia" usa ele |
+| `src/features/relatorios/report-table.tsx` | `conferredAt` = `conferred_at ?? created_at`; `generatedAt` = now |
 
 ## Verificação
 

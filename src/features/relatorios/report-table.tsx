@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { parseISO } from "date-fns"
+
 import { cn } from "@/lib/utils"
 import { formatBRL } from "@/lib/currency"
 import { dateISOToBR } from "@/lib/date"
@@ -102,6 +104,7 @@ export function ReportTable({ reports, sort, onToggleSort }: ReportTableProps) {
       const blob = await reportPdfBlob({
         report,
         summary,
+        conferredAt: parseISO(report.conferred_at ?? report.created_at),
         generatedAt: new Date(),
         church: toChurchView(churchData ?? null),
       })

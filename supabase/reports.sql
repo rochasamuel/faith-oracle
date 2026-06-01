@@ -72,10 +72,15 @@ create table if not exists public.reports (
     check (period_type <> 'mensal' or reference_month is not null)
 );
 
+-- Dia da conferência informado na geração (manual para relatórios retroativos).
+-- Adicionada após a criação inicial da tabela; nula em relatórios antigos.
+alter table public.reports add column if not exists conferred_at date;
+
 comment on table  public.reports                is 'Relatórios financeiros gerados (mensais ou anuais).';
 comment on column public.reports.status         is 'processando | concluido | erro | invalidado (soft delete).';
 comment on column public.reports.invalidated_at is 'Data da invalidação (soft delete). Nulo enquanto válido.';
 comment on column public.reports.balance        is 'Saldo apurado em centavos (total_entradas - total_saidas) no período.';
+comment on column public.reports.conferred_at   is 'Dia da conferência informado na geração; usado no PDF ("Conferido dia"). Nulo em relatórios antigos.';
 
 create index if not exists reports_reference_idx  on public.reports (reference_year desc, reference_month desc);
 create index if not exists reports_status_idx      on public.reports (status);
