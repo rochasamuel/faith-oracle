@@ -131,6 +131,7 @@ export function ReconciliationDialog() {
             <Label htmlFor="rec-amount">Saldo real no banco</Label>
             <CurrencyInput
               id="rec-amount"
+              className="h-9 text-sm"
               valueCents={amountCents}
               onValueChange={setAmountCents}
             />

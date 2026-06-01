@@ -109,6 +109,7 @@ export function CheckpointForm({ onSubmit, isSubmitting }: CheckpointFormProps) 
         <Label htmlFor="amount">Saldo real da conta</Label>
         <CurrencyInput
           id="amount"
+          className="h-9 text-sm"
           valueCents={amountCents}
           onValueChange={setAmountCents}
         />
@@ -116,7 +117,12 @@ export function CheckpointForm({ onSubmit, isSubmitting }: CheckpointFormProps) 
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="notes">Observação (opcional)</Label>
-        <Input id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+        <Input
+          id="notes"
+          className="h-9 text-sm"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
       </div>
 
       <Button type="submit" disabled={isSubmitting}>
