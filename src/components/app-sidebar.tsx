@@ -67,6 +67,10 @@ const data = {
           url: "/financeiro/novo",
         },
         {
+          title: "Saldos iniciais",
+          url: "/financeiro/saldos",
+        },
+        {
           title: "Relatórios",
           url: "/relatorios",
         },
