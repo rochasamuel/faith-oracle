@@ -53,9 +53,19 @@ type FieldErrors = Partial<
   Record<keyof z.infer<typeof schema> | "date", string>
 >
 
-export function TransactionForm() {
+interface TransactionFormProps {
+  /** Chamado após salvar com sucesso. Padrão: navega para os lançamentos. */
+  onSuccess?: () => void
+  /** Chamado ao cancelar. Padrão: navega para os lançamentos. */
+  onCancel?: () => void
+}
+
+export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps = {}) {
   const navigate = useNavigate()
   const createTransaction = useCreateTransaction()
+
+  const handleDone = onSuccess ?? (() => navigate("/financeiro/lancamentos"))
+  const handleCancel = onCancel ?? (() => navigate("/financeiro/lancamentos"))
 
   const [type, setType] = React.useState<TransactionType>("entrada")
   const [category, setCategory] = React.useState<TransactionCategory | null>(null)
@@ -99,7 +109,7 @@ export function TransactionForm() {
         notes: result.data!.notes ?? null,
       },
       {
-        onSuccess: () => navigate("/financeiro/lancamentos"),
+        onSuccess: () => handleDone(),
       }
     )
   }
@@ -239,7 +249,7 @@ export function TransactionForm() {
         <Button
           type="button"
           variant="outline"
-          onClick={() => navigate("/financeiro/lancamentos")}
+          onClick={() => handleCancel()}
         >
           Cancelar
         </Button>

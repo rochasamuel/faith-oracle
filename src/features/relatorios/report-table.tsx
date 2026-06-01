@@ -35,6 +35,8 @@ import { InvalidateReportDialog } from "@/features/relatorios/invalidate-report-
 import { downloadBlob, slugify } from "@/features/relatorios/report-download"
 import { buildReportSummary } from "@/features/relatorios/report-summary"
 import { reportPdfBlob } from "@/features/relatorios/report-pdf-blob"
+import { useChurchInfo } from "@/features/igreja/use-church-info"
+import { toChurchView } from "@/features/igreja/church-view"
 import { formatReportPdfTitle } from "@/features/relatorios/report-title"
 import type {
   ReportSortKey,
@@ -85,6 +87,7 @@ function SortableHead({
 
 export function ReportTable({ reports, sort, onToggleSort }: ReportTableProps) {
   const invalidateReport = useInvalidateReport()
+  const { data: churchData } = useChurchInfo()
   const [pending, setPending] = React.useState<Report | null>(null)
   const [downloadingId, setDownloadingId] = React.useState<string | null>(null)
 
@@ -100,6 +103,7 @@ export function ReportTable({ reports, sort, onToggleSort }: ReportTableProps) {
         report,
         summary,
         generatedAt: new Date(),
+        church: toChurchView(churchData ?? null),
       })
       downloadBlob(`${slugify(formatReportPdfTitle(report))}.pdf`, blob)
     } catch (error) {

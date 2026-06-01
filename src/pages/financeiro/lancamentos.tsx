@@ -1,9 +1,9 @@
 import * as React from "react"
-import { Link } from "react-router"
 import { endOfDay, isWithinInterval, parseISO, startOfDay } from "date-fns"
-import { PlusIcon, SearchXIcon, WalletIcon } from "lucide-react"
+import { SearchXIcon, WalletIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
+import { NewTransactionDialog } from "@/features/financeiro/new-transaction-dialog"
 import {
   Card,
   CardContent,
@@ -101,10 +101,7 @@ export default function LancamentosPage() {
             Entradas e saídas financeiras registradas.
           </p>
         </div>
-        <Button nativeButton={false} render={<Link to="/financeiro/novo" />}>
-          <PlusIcon />
-          Novo lançamento
-        </Button>
+        <NewTransactionDialog />
       </div>
 
       {/* Resumo */}
@@ -158,14 +155,7 @@ export default function LancamentosPage() {
                 Comece registrando a primeira entrada ou saída.
               </p>
             </div>
-            <Button
-              nativeButton={false}
-              render={<Link to="/financeiro/novo" />}
-              size="sm"
-            >
-              <PlusIcon />
-              Novo lançamento
-            </Button>
+            <NewTransactionDialog size="sm" />
           </CardContent>
         </Card>
       ) : visible.length === 0 ? (

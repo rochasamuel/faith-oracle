@@ -66,7 +66,14 @@ function buildLines(transactions: Transaction[]): ReportLine[] {
         })
       }
     } else {
-      single.push({ date: t.occurred_at, label, amount: t.amount })
+      // Categorias não agregadas: mostra a observação do lançamento; sem
+      // observação, cai no nome da categoria para não deixar a linha vazia.
+      const obs = t.notes?.trim()
+      single.push({
+        date: t.occurred_at,
+        label: obs || label,
+        amount: t.amount,
+      })
     }
   }
 

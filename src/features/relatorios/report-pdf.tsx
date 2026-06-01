@@ -15,7 +15,8 @@ import InterRegular from "@/assets/fonts/Inter_400Regular.ttf"
 import InterSemiBold from "@/assets/fonts/Inter_600SemiBold.ttf"
 import InterBold from "@/assets/fonts/Inter_700Bold.ttf"
 import type { Report } from "@/api/reports"
-import { CHURCH_INFO, type IgrejaTipoImovel } from "@/config/church"
+import { TIPO_IMOVEL_LABEL } from "@/config/church"
+import type { ChurchView } from "@/features/igreja/church-view"
 import { formatBRL } from "@/lib/currency"
 import { dateISOToBR, formatDateBR } from "@/lib/date"
 import type { ReportLine, ReportSummary } from "./report-summary"
@@ -202,11 +203,6 @@ const styles = StyleSheet.create({
   },
 })
 
-const TIPO_IMOVEL_LABEL: Record<IgrejaTipoImovel, string> = {
-  propria: "Igreja própria",
-  alugada: "Igreja alugada",
-  cedida: "Igreja cedida",
-}
 
 /** Checkbox no estilo shadcn: quadrado arredondado, preenchido com check (SVG) quando marcado. */
 function CheckField({ label, checked }: { label: string; checked: boolean }) {
@@ -304,12 +300,14 @@ export interface ReportDocumentProps {
   report: Report
   summary: ReportSummary
   generatedAt: Date
+  church: ChurchView
 }
 
 export function ReportDocument({
   report,
   summary,
   generatedAt,
+  church,
 }: ReportDocumentProps) {
   const invalidated = report.status === "invalidado"
   const saldoColor = summary.saldoFinal >= 0 ? COLORS.positive : COLORS.negative
@@ -331,13 +329,13 @@ export function ReportDocument({
           <Image style={styles.logo} src={logoIgreja} />
           <View style={styles.headerText}>
             <Text style={styles.title}>{formatReportPdfTitle(report)}</Text>
-            <Text style={styles.churchName}>{CHURCH_INFO.nome}</Text>
+            <Text style={styles.churchName}>{church.nome}</Text>
             <Text style={styles.churchLine}>
-              CNPJ: {CHURCH_INFO.cnpj} | Pastor Presidente:{" "}
-              {CHURCH_INFO.pastorPresidente}
+              CNPJ: {church.cnpj} | Pastor Presidente:{" "}
+              {church.pastorPresidente}
             </Text>
             <Text style={[styles.churchLine, styles.addressLine]}>
-              {CHURCH_INFO.endereco}
+              {church.endereco}
             </Text>
           </View>
         </View>
@@ -396,21 +394,21 @@ export function ReportDocument({
         <View style={styles.footer}>
           <Text>Conferido dia {formatDateBR(generatedAt)}</Text>
           <View style={styles.footerLine}>
-            <Text>Quantidade de membros: {CHURCH_INFO.quantidadeMembros}</Text>
-            <Text>Quantidade de obreiros: {CHURCH_INFO.quantidadeObreiros}</Text>
+            <Text>Quantidade de membros: {church.quantidadeMembros}</Text>
+            <Text>Quantidade de obreiros: {church.quantidadeObreiros}</Text>
           </View>
           <View style={styles.checkRow}>
             <CheckField
               label={TIPO_IMOVEL_LABEL.propria}
-              checked={CHURCH_INFO.tipoImovel === "propria"}
+              checked={church.tipoImovel === "propria"}
             />
             <CheckField
               label={TIPO_IMOVEL_LABEL.alugada}
-              checked={CHURCH_INFO.tipoImovel === "alugada"}
+              checked={church.tipoImovel === "alugada"}
             />
             <CheckField
               label={TIPO_IMOVEL_LABEL.cedida}
-              checked={CHURCH_INFO.tipoImovel === "cedida"}
+              checked={church.tipoImovel === "cedida"}
             />
           </View>
         </View>

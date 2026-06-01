@@ -23,3 +23,15 @@ export const AGGREGATED_CATEGORIES: TransactionCategory[] = [
   "ofertas",
   "doacoes",
 ]
+
+/** Rótulos exibidos para cada tipo de imóvel (relatório e formulário). */
+export const TIPO_IMOVEL_LABEL: Record<IgrejaTipoImovel, string> = {
+  propria: "Igreja própria",
+  alugada: "Igreja alugada",
+  cedida: "Igreja cedida",
+}
+
+/** Lista value/label para popular selects. */
+export const TIPO_IMOVEL_OPTIONS = (
+  Object.keys(TIPO_IMOVEL_LABEL) as IgrejaTipoImovel[]
+).map((value) => ({ value, label: TIPO_IMOVEL_LABEL[value] }))
