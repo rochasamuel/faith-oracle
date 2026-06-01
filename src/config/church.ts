@@ -18,7 +18,11 @@ export const CHURCH_INFO = {
  * Categorias agregadas (mês + categoria) no relatório.
  * As demais categorias saem lançamento por lançamento.
  */
-export const AGGREGATED_CATEGORIES: TransactionCategory[] = ["dizimos", "ofertas"]
+export const AGGREGATED_CATEGORIES: TransactionCategory[] = [
+  "dizimos",
+  "ofertas",
+  "doacoes",
+]
 
 /**
  * Saldo de caixa (em reais) que a igreja já possuía ANTES do primeiro lançamento

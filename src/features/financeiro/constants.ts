@@ -8,6 +8,7 @@ export type TransactionType = "entrada" | "saida"
 export type TransactionCategory =
   | "dizimos"
   | "ofertas"
+  | "doacoes"
   | "ajuda_social"
   | "eventos"
   | "despesas_fixas"
@@ -24,6 +25,7 @@ export const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
 export const TRANSACTION_CATEGORY_LABELS: Record<TransactionCategory, string> = {
   dizimos: "Dízimos",
   ofertas: "Ofertas",
+  doacoes: "Doações (não identificado)",
   ajuda_social: "Ajuda social",
   eventos: "Eventos",
   despesas_fixas: "Despesas fixas",

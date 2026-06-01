@@ -36,6 +36,7 @@ const schema = z.object({
   category: z.enum([
     "dizimos",
     "ofertas",
+    "doacoes",
     "ajuda_social",
     "eventos",
     "despesas_fixas",
