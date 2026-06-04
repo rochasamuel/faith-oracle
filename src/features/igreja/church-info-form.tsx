@@ -19,16 +19,13 @@ import {
 } from "@/config/church"
 import type { ChurchInfoInput } from "@/api/church-info"
 import type { ChurchView } from "@/features/igreja/church-view"
+import { useMemberCount } from "@/features/igreja/use-members"
 
 const schema = z.object({
   nome: z.string().trim().min(1, "Informe o nome da igreja."),
   cnpj: z.string().trim().max(30, "CNPJ muito longo.").optional(),
   pastorPresidente: z.string().trim().max(120, "Nome muito longo.").optional(),
   endereco: z.string().trim().max(300, "Endereço muito longo.").optional(),
-  quantidadeMembros: z
-    .number({ message: "Informe um número." })
-    .int("Use um número inteiro.")
-    .min(0, "Não pode ser negativo."),
   quantidadeObreiros: z
     .number({ message: "Informe um número." })
     .int("Use um número inteiro.")
@@ -55,9 +52,7 @@ export function ChurchInfoForm({
     defaultValues.pastorPresidente
   )
   const [endereco, setEndereco] = React.useState(defaultValues.endereco)
-  const [quantidadeMembros, setQuantidadeMembros] = React.useState(
-    String(defaultValues.quantidadeMembros)
-  )
+  const memberCount = useMemberCount()
   const [quantidadeObreiros, setQuantidadeObreiros] = React.useState(
     String(defaultValues.quantidadeObreiros)
   )
@@ -73,7 +68,6 @@ export function ChurchInfoForm({
       cnpj: cnpj.trim() || undefined,
       pastorPresidente: pastorPresidente.trim() || undefined,
       endereco: endereco.trim() || undefined,
-      quantidadeMembros: Number(quantidadeMembros),
       quantidadeObreiros: Number(quantidadeObreiros),
       tipoImovel,
     })
@@ -94,7 +88,6 @@ export function ChurchInfoForm({
       cnpj: result.data.cnpj ?? null,
       pastor_presidente: result.data.pastorPresidente ?? null,
       endereco: result.data.endereco ?? null,
-      quantidade_membros: result.data.quantidadeMembros,
       quantidade_obreiros: result.data.quantidadeObreiros,
       tipo_imovel: result.data.tipoImovel,
     })
@@ -159,16 +152,14 @@ export function ChurchInfoForm({
           <Label htmlFor="membros">Quantidade de membros</Label>
           <Input
             id="membros"
-            type="number"
-            min={0}
             className="h-9 text-sm"
-            value={quantidadeMembros}
-            aria-invalid={!!errors.quantidadeMembros}
-            onChange={(e) => setQuantidadeMembros(e.target.value)}
+            value={memberCount.isLoading ? "..." : String(memberCount.data ?? 0)}
+            readOnly
+            disabled
           />
-          {errors.quantidadeMembros && (
-            <p className="text-xs text-destructive">{errors.quantidadeMembros}</p>
-          )}
+          <p className="text-xs text-muted-foreground">
+            Calculado a partir do cadastro de membros ativos.
+          </p>
         </div>
 
         <div className="flex flex-col gap-2">

@@ -18,13 +18,15 @@ export interface ChurchInfo {
   updated_at: string
 }
 
-/** Campos editáveis (payload de upsert). */
+/**
+ * Campos editáveis (payload de upsert). `quantidade_membros` não é mais
+ * editável: a contagem oficial vem do cadastro de membros (ver api/members).
+ */
 export interface ChurchInfoInput {
   nome: string
   cnpj: string | null
   pastor_presidente: string | null
   endereco: string | null
-  quantidade_membros: number
   quantidade_obreiros: number
   tipo_imovel: IgrejaTipoImovel
 }

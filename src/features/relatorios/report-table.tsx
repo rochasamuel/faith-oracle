@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils"
 import { formatBRL } from "@/lib/currency"
 import { dateISOToBR } from "@/lib/date"
 import { getBalanceBefore, listTransactionsInPeriod } from "@/api/transactions"
+import { countActiveMembers } from "@/api/members"
 import type { Report } from "@/api/reports"
 import {
   formatReferenceLabel,
@@ -96,17 +97,20 @@ export function ReportTable({ reports, sort, onToggleSort }: ReportTableProps) {
   async function handleDownload(report: Report) {
     setDownloadingId(report.id)
     try {
-      const [transactions, saldoInicial] = await Promise.all([
-        listTransactionsInPeriod(report.period_start, report.period_end),
-        getBalanceBefore(report.period_start),
-      ])
+      const [transactions, saldoInicial, quantidadeMembros] =
+        await Promise.all([
+          listTransactionsInPeriod(report.period_start, report.period_end),
+          getBalanceBefore(report.period_start),
+          countActiveMembers(),
+        ])
       const summary = buildReportSummary(report, transactions, saldoInicial)
       const blob = await reportPdfBlob({
         report,
         summary,
         conferredAt: parseISO(report.conferred_at ?? report.created_at),
         generatedAt: new Date(),
-        church: toChurchView(churchData ?? null),
+        // A contagem oficial de membros vem do cadastro (apenas ativos).
+        church: { ...toChurchView(churchData ?? null), quantidadeMembros },
       })
       downloadBlob(`${slugify(formatReportPdfTitle(report))}.pdf`, blob)
     } catch (error) {

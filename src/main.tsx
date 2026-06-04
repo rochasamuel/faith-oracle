@@ -12,6 +12,7 @@ import SaldosPage from './pages/financeiro/saldos.tsx'
 import RelatoriosPage from './pages/relatorios/index.tsx'
 import InformacoesPage from './pages/igreja/informacoes.tsx'
 import MembrosPage from './pages/igreja/membros.tsx'
+import MembroFormPage from './pages/igreja/membro-form-page.tsx'
 
 const queryClient = new QueryClient()
 
@@ -26,6 +27,8 @@ const router = createBrowserRouter([
       { path: 'relatorios', element: <RelatoriosPage /> },
       { path: 'igreja/informacoes', element: <InformacoesPage /> },
       { path: 'igreja/membros', element: <MembrosPage /> },
+      { path: 'igreja/membros/novo', element: <MembroFormPage /> },
+      { path: 'igreja/membros/:id/editar', element: <MembroFormPage /> },
     ],
   },
 ])

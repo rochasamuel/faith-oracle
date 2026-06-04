@@ -9,7 +9,7 @@ export const CHURCH_INFO = {
   pastorPresidente: "Miguel de Jesus Rocha",
   endereco:
     "SCSV Quadra 01 Conjunto 02 Lote 02 (Setor Leste) – Cidade Estrutural – DF CEP: 71.262-110",
-  quantidadeMembros: 0, // editar conforme a igreja
+  quantidadeMembros: 0, // fallback; a contagem oficial vem do cadastro de membros
   quantidadeObreiros: 0, // editar conforme a igreja
   tipoImovel: "alugada" as IgrejaTipoImovel,
 } as const
