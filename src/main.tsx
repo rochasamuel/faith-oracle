@@ -7,6 +7,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import './index.css'
 import Layout from './layout.tsx'
 import { Toaster } from './components/ui/sonner.tsx'
+import { RequireAuth } from './features/acesso/require-auth.tsx'
+import EntrarPage from './pages/entrar.tsx'
 import LancamentosPage from './pages/financeiro/lancamentos.tsx'
 import SaldosPage from './pages/financeiro/saldos.tsx'
 import RelatoriosPage from './pages/relatorios/index.tsx'
@@ -17,18 +19,24 @@ import MembroFormPage from './pages/igreja/membro-form-page.tsx'
 const queryClient = new QueryClient()
 
 const router = createBrowserRouter([
+  { path: '/entrar', element: <EntrarPage /> },
   {
-    path: '/',
-    element: <Layout />,
+    element: <RequireAuth />,
     children: [
-      { index: true, element: <Navigate to="/financeiro/lancamentos" replace /> },
-      { path: 'financeiro/lancamentos', element: <LancamentosPage /> },
-      { path: 'financeiro/saldos', element: <SaldosPage /> },
-      { path: 'relatorios', element: <RelatoriosPage /> },
-      { path: 'igreja/informacoes', element: <InformacoesPage /> },
-      { path: 'igreja/membros', element: <MembrosPage /> },
-      { path: 'igreja/membros/novo', element: <MembroFormPage /> },
-      { path: 'igreja/membros/:id/editar', element: <MembroFormPage /> },
+      {
+        path: '/',
+        element: <Layout />,
+        children: [
+          { index: true, element: <Navigate to="/financeiro/lancamentos" replace /> },
+          { path: 'financeiro/lancamentos', element: <LancamentosPage /> },
+          { path: 'financeiro/saldos', element: <SaldosPage /> },
+          { path: 'relatorios', element: <RelatoriosPage /> },
+          { path: 'igreja/informacoes', element: <InformacoesPage /> },
+          { path: 'igreja/membros', element: <MembrosPage /> },
+          { path: 'igreja/membros/novo', element: <MembroFormPage /> },
+          { path: 'igreja/membros/:id/editar', element: <MembroFormPage /> },
+        ],
+      },
     ],
   },
 ])

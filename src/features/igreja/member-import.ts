@@ -7,6 +7,9 @@
  * sem máscara (normalizados para o formato persistido).
  *
  * A validação é tudo-ou-nada: qualquer linha inválida impede a importação.
+ *
+ * ATENÇÃO (temporário): a validação estrita está desativada — todos os
+ * campos são opcionais e valores inválidos viram null. Ver TODO no rowSchema.
  */
 import { z } from "zod"
 import { isMatch } from "date-fns"
@@ -78,48 +81,85 @@ const telefoneSchema = z
   )
   .transform(formatTelefone)
 
-/** Linha do JSON de importação (chaves desconhecidas são erro — pega typos). */
-const rowSchema = z.strictObject({
-  nome_completo: z
-    .string("Informe o nome completo.")
-    .trim()
-    .min(1, "Informe o nome completo.")
-    .max(160, "Nome muito longo."),
-  data_nascimento: dateSchema.nullish(),
-  naturalidade: optionalText(120),
-  estado_civil: z
-    .enum(
-      ESTADO_CIVIL_VALUES,
-      `Estado civil inválido (valores: ${ESTADO_CIVIL_VALUES.join(", ")}).`
-    )
-    .nullish(),
-  nome_conjuge: optionalText(160),
-  rg: optionalText(20),
-  orgao_emissor: optionalText(20),
-  rg_uf: z.enum(UFS, "UF inválida (use a sigla, ex.: PE).").nullish(),
-  cpf: cpfSchema.nullish(),
-  nome_mae: optionalText(160),
-  nome_pai: optionalText(160),
-  escolaridade: z
-    .enum(
-      ESCOLARIDADE_VALUES,
-      `Escolaridade inválida (valores: ${ESCOLARIDADE_VALUES.join(", ")}).`
-    )
-    .nullish(),
-  profissao: optionalText(120),
-  endereco: optionalText(300),
-  cidade: optionalText(120),
-  uf: z.enum(UFS, "UF inválida (use a sigla, ex.: PE).").nullish(),
-  cep: cepSchema.nullish(),
-  telefone: telefoneSchema.nullish(),
-  email: z.email("E-mail inválido.").max(160, "E-mail muito longo.").nullish(),
-  batizado_aguas: boolSchema.nullish(),
-  batismo_aguas_data: dateSchema.nullish(),
-  batismo_aguas_igreja: optionalText(160),
-  batizado_espirito_santo: boolSchema.nullish(),
-  data_ingresso: dateSchema.nullish(),
-  cargo: optionalText(80),
-  ativo: boolSchema.nullish(),
+// TODO(temporário): validação estrita desativada — restaurar o strictObject
+// abaixo quando a importação for revalidada. NÃO remover o bloco comentado.
+//
+// /** Linha do JSON de importação (chaves desconhecidas são erro — pega typos). */
+// const rowSchema = z.strictObject({
+//   nome_completo: z
+//     .string("Informe o nome completo.")
+//     .trim()
+//     .min(1, "Informe o nome completo.")
+//     .max(160, "Nome muito longo."),
+//   data_nascimento: dateSchema.nullish(),
+//   naturalidade: optionalText(120),
+//   estado_civil: z
+//     .enum(
+//       ESTADO_CIVIL_VALUES,
+//       `Estado civil inválido (valores: ${ESTADO_CIVIL_VALUES.join(", ")}).`
+//     )
+//     .nullish(),
+//   nome_conjuge: optionalText(160),
+//   rg: optionalText(20),
+//   orgao_emissor: optionalText(20),
+//   rg_uf: z.enum(UFS, "UF inválida (use a sigla, ex.: PE).").nullish(),
+//   cpf: cpfSchema.nullish(),
+//   nome_mae: optionalText(160),
+//   nome_pai: optionalText(160),
+//   escolaridade: z
+//     .enum(
+//       ESCOLARIDADE_VALUES,
+//       `Escolaridade inválida (valores: ${ESCOLARIDADE_VALUES.join(", ")}).`
+//     )
+//     .nullish(),
+//   profissao: optionalText(120),
+//   endereco: optionalText(300),
+//   cidade: optionalText(120),
+//   uf: z.enum(UFS, "UF inválida (use a sigla, ex.: PE).").nullish(),
+//   cep: cepSchema.nullish(),
+//   telefone: telefoneSchema.nullish(),
+//   email: z.email("E-mail inválido.").max(160, "E-mail muito longo.").nullish(),
+//   batizado_aguas: boolSchema.nullish(),
+//   batismo_aguas_data: dateSchema.nullish(),
+//   batismo_aguas_igreja: optionalText(160),
+//   batizado_espirito_santo: boolSchema.nullish(),
+//   data_ingresso: dateSchema.nullish(),
+//   cargo: optionalText(80),
+//   ativo: boolSchema.nullish(),
+// })
+
+/**
+ * Schema TEMPORÁRIO e permissivo: todos os campos opcionais; valores
+ * inválidos viram `null` (`.catch`) em vez de bloquear a importação.
+ * Chaves desconhecidas são ignoradas (looseObject).
+ */
+const rowSchema = z.looseObject({
+  nome_completo: z.string().trim().max(160).catch(""),
+  data_nascimento: dateSchema.nullish().catch(null),
+  naturalidade: optionalText(120).catch(null),
+  estado_civil: z.enum(ESTADO_CIVIL_VALUES).nullish().catch(null),
+  nome_conjuge: optionalText(160).catch(null),
+  rg: optionalText(20).catch(null),
+  orgao_emissor: optionalText(20).catch(null),
+  rg_uf: z.enum(UFS).nullish().catch(null),
+  cpf: cpfSchema.nullish().catch(null),
+  nome_mae: optionalText(160).catch(null),
+  nome_pai: optionalText(160).catch(null),
+  escolaridade: z.enum(ESCOLARIDADE_VALUES).nullish().catch(null),
+  profissao: optionalText(120).catch(null),
+  endereco: optionalText(300).catch(null),
+  cidade: optionalText(120).catch(null),
+  uf: z.enum(UFS).nullish().catch(null),
+  cep: cepSchema.nullish().catch(null),
+  telefone: telefoneSchema.nullish().catch(null),
+  email: z.email().max(160).nullish().catch(null),
+  batizado_aguas: boolSchema.nullish().catch(null),
+  batismo_aguas_data: dateSchema.nullish().catch(null),
+  batismo_aguas_igreja: optionalText(160).catch(null),
+  batizado_espirito_santo: boolSchema.nullish().catch(null),
+  data_ingresso: dateSchema.nullish().catch(null),
+  cargo: optionalText(80).catch(null),
+  ativo: boolSchema.nullish().catch(null),
 })
 
 type ImportRow = z.infer<typeof rowSchema>

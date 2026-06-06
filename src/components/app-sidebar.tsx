@@ -12,15 +12,11 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { useSession } from "@/features/acesso/use-session"
 import { GalleryVerticalEndIcon, AudioLinesIcon, TerminalIcon, WalletIcon, ChurchIcon } from "lucide-react"
 
 // This is sample data.
 const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
   teams: [
     {
       name: "Acme Inc",
@@ -94,6 +90,17 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { session } = useSession()
+  const authUser = session?.user
+  const user = {
+    name:
+      (authUser?.user_metadata?.full_name as string | undefined) ??
+      authUser?.email ??
+      "Usuário",
+    email: authUser?.email ?? "",
+    avatar: (authUser?.user_metadata?.avatar_url as string | undefined) ?? "",
+  }
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -103,7 +110,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={user} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>
