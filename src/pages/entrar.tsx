@@ -1,10 +1,9 @@
 import { useState } from "react"
 import { Navigate } from "react-router"
-import { ChurchIcon } from "lucide-react"
 
+import logoIgreja from "@/assets/logo-igreja.png"
 import { supabase } from "@/lib/supabase"
 import { useSession } from "@/features/acesso/use-session"
-import { CHURCH_INFO } from "@/config/church"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -26,8 +25,7 @@ export default function EntrarPage() {
   if (loading) return null
   if (session) return <Navigate to="/" replace />
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function handleSubmit() {
     setSigningIn(true)
     setError(null)
     const { error } = await supabase.auth.signInWithPassword({
@@ -45,16 +43,24 @@ export default function EntrarPage() {
     <div className="flex min-h-svh items-center justify-center bg-muted/40 p-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
-          <div className="mb-2 flex size-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <ChurchIcon className="size-6" />
-          </div>
-          <CardTitle className="font-heading">{CHURCH_INFO.nome}</CardTitle>
+          <img
+            src={logoIgreja}
+            alt="Logo da igreja"
+            className="mx-auto mb-2 size-16 object-contain"
+          />
+          <CardTitle className="font-heading">ASSEMBLEIA DE DEUS MINISTÉRIO LIVRE</CardTitle>
           <CardDescription>
             Entre com sua conta para acessar a plataforma.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form
+            onSubmit={(event) => {
+              event.preventDefault()
+              void handleSubmit()
+            }}
+            className="flex flex-col gap-4"
+          >
             <div className="flex flex-col gap-2">
               <Label htmlFor="email">E-mail</Label>
               <Input
