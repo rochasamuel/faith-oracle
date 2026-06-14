@@ -1,4 +1,4 @@
-import { MinusIcon, PlusIcon } from "lucide-react"
+import { DownloadIcon, MinusIcon, PlusIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -24,6 +24,10 @@ interface DayMetricsProps {
   /** Persiste no banco (autosave: blur dos campos / clique nos contadores). */
   onCommit: (patch: AulaPatch) => void
   readOnly: boolean
+  /** Dispara a busca da lição na CPAD (usa o nº da lição atual). */
+  onBuscarLicao: () => void
+  /** Busca em andamento. */
+  buscandoLicao: boolean
 }
 
 export function DayMetrics({
@@ -31,6 +35,8 @@ export function DayMetrics({
   onLocal,
   onCommit,
   readOnly,
+  onBuscarLicao,
+  buscandoLicao,
 }: DayMetricsProps) {
   // Um committer debounced por campo (independentes, não se sobrescrevem).
   const commitOferta = useDebouncedCallback(
@@ -71,18 +77,32 @@ export function DayMetrics({
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="licao">Nº da lição</Label>
-          <Input
-            id="licao"
-            inputMode="numeric"
-            className="h-9 text-sm"
-            value={values.numero_licao}
-            onChange={(e) => {
-              const raw = e.target.value.replace(/\D/g, "")
-              onLocal({ numero_licao: raw })
-              commitLicao(raw)
-            }}
-            disabled={readOnly}
-          />
+          <div className="flex items-center gap-2">
+            <Input
+              id="licao"
+              inputMode="numeric"
+              className="h-9 flex-1 text-sm"
+              value={values.numero_licao}
+              onChange={(e) => {
+                const raw = e.target.value.replace(/\D/g, "")
+                onLocal({ numero_licao: raw })
+                commitLicao(raw)
+              }}
+              disabled={readOnly}
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-9 shrink-0"
+              onClick={onBuscarLicao}
+              disabled={readOnly || buscandoLicao || !values.numero_licao}
+              title="Buscar lição da CPAD"
+            >
+              <DownloadIcon className="size-4" />
+              {buscandoLicao ? "Buscando..." : "Buscar lição"}
+            </Button>
+          </div>
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router"
 import { format, parseISO } from "date-fns"
 import { ptBR } from "date-fns/locale"
 import { ArrowLeftIcon } from "lucide-react"
+import { toast } from "sonner"
 
 import { Card, CardContent } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
@@ -10,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { DayFrequency } from "@/features/ebd/day-frequency"
 import { DayMetrics, type DayMetricsValues } from "@/features/ebd/day-metrics"
 import { DaySummary } from "@/features/ebd/day-summary"
+import { LessonContent } from "@/features/ebd/lesson-content"
 import {
   contarTotais,
   statusFinal,
@@ -21,6 +23,7 @@ import {
   useCloseDay,
   useFrequencias,
   useMatriculas,
+  useBuscarLicao,
   useReopenDay,
   useSetFrequencia,
   useSetFrequencias,
@@ -93,6 +96,7 @@ function DayEditor({
   const updateAula = useUpdateAula()
   const closeDay = useCloseDay()
   const reopenDay = useReopenDay()
+  const buscarLicao = useBuscarLicao()
 
   const dataAulaISO = aula.data
   const readOnly = aula.status === "fechada"
@@ -116,6 +120,10 @@ function DayEditor({
     professor: aula.professor ?? "",
   }))
 
+  const [conteudoLicao, setConteudoLicao] = React.useState(
+    aula.conteudo_licao ?? ""
+  )
+
   function handleStatus(matriculaId: string, status: EbdFrequenciaStatus) {
     setStatuses((prev) => ({ ...prev, [matriculaId]: status }))
     setFrequencia.mutate({ aulaId: aula.id, matriculaId, status })
@@ -136,6 +144,32 @@ function DayEditor({
 
   function commitMetric(patch: AulaPatch) {
     updateAula.mutate({ id: aula.id, patch })
+  }
+
+  function handleBuscarLicao() {
+    const tri = aula.turma_trimestre?.trimestre
+    const licao = Number(metrics.numero_licao)
+    if (!tri || !licao) return
+    buscarLicao.mutate(
+      { ano: tri.ano, trimestre: tri.numero, licao },
+      {
+        onSuccess: (data) => {
+          setMetrics((prev) => ({
+            ...prev,
+            titulo_licao: data.titulo || prev.titulo_licao,
+          }))
+          setConteudoLicao(data.markdown)
+          updateAula.mutate({
+            id: aula.id,
+            patch: {
+              titulo_licao: data.titulo || metrics.titulo_licao.trim() || null,
+              conteudo_licao: data.markdown,
+            },
+          })
+          toast.success("Lição importada da CPAD.")
+        },
+      }
+    )
   }
 
   function handleClose() {
@@ -239,7 +273,16 @@ function DayEditor({
         onLocal={(patch) => setMetrics((prev) => ({ ...prev, ...patch }))}
         onCommit={commitMetric}
         readOnly={readOnly}
+        onBuscarLicao={handleBuscarLicao}
+        buscandoLicao={buscarLicao.isPending}
       />
+
+      {conteudoLicao && (
+        <>
+          <Separator />
+          <LessonContent markdown={conteudoLicao} />
+        </>
+      )}
     </div>
   )
 }
