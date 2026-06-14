@@ -14,7 +14,7 @@
 -- Como aplicar:
 --   1. Abra o SQL Editor do projeto Supabase.
 --   2. Cole e execute este arquivo (re-executável: usa "if not exists").
---   3. Em seguida, ebd/0002_remove_tema.sql.
+--   3. Em seguida, ebd/0002_remove_tema.sql e ebd/0003_conteudo_licao.sql.
 --   (para recriar do zero durante mudanças, rode ebd/reset.sql antes.)
 -- =============================================================================
 
@@ -176,6 +176,8 @@ create table if not exists public.ebd_aulas (
   numero_licao       int             check (numero_licao is null or numero_licao > 0),
   titulo_licao       text,
   professor          text,
+  -- Conteúdo da lição em markdown (importado da CPAD; ver 0003). Null = não buscado.
+  conteudo_licao     text,
 
   -- Métricas digitadas no dia
   oferta_centavos    int             not null default 0 check (oferta_centavos >= 0),

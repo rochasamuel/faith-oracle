@@ -62,6 +62,7 @@ export interface EbdAula {
   data: string // ISO yyyy-mm-dd
   numero_licao: number | null
   titulo_licao: string | null
+  conteudo_licao: string | null
   professor: string | null
   oferta_centavos: number
   visitantes: number
@@ -349,6 +350,7 @@ export type AulaPatch = Partial<
     | "data"
     | "numero_licao"
     | "titulo_licao"
+    | "conteudo_licao"
     | "professor"
     | "oferta_centavos"
     | "visitantes"

@@ -24,7 +24,7 @@ autossuficiente e a ordem **entre** módulos é indiferente. Sugestão de ordem:
 1. `financeiro/0001_init.sql` → `financeiro/0002_marcos_conciliacoes.sql`
 2. `igreja/0001_church_info.sql` → `0002_membros.sql` → `0003_membros_foto.sql`
 3. `relatorios/0001_init.sql`
-4. `ebd/0001_init.sql` → `ebd/0002_remove_tema.sql`
+4. `ebd/0001_init.sql` → `ebd/0002_remove_tema.sql` → `ebd/0003_conteudo_licao.sql`
 
 ## Reset (apaga dados)
 
