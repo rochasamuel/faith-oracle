@@ -428,3 +428,40 @@ export async function upsertFrequencias(
     .upsert(payload, { onConflict: "aula_id,matricula_id" })
   if (error) throw error
 }
+
+// =============================================================================
+// Scraper da lição (Edge Function buscar-licao)
+// =============================================================================
+
+export interface LicaoImportada {
+  titulo: string
+  markdown: string
+}
+
+/** Invoca a Edge Function que busca e converte a lição da CPAD em markdown. */
+export async function buscarLicaoCpad(params: {
+  ano: number
+  trimestre: number
+  licao: number
+}): Promise<LicaoImportada> {
+  const { data, error } = await supabase.functions.invoke<LicaoImportada>(
+    "buscar-licao",
+    { body: params }
+  )
+  if (error) {
+    let msg = "Não foi possível buscar a lição."
+    // A função devolve { error } no corpo; tenta ler a mensagem específica.
+    const ctx = (error as { context?: Response }).context
+    if (ctx && typeof ctx.json === "function") {
+      try {
+        const body = await ctx.json()
+        if (body?.error) msg = body.error as string
+      } catch {
+        /* mantém a mensagem padrão */
+      }
+    }
+    throw new Error(msg)
+  }
+  if (!data) throw new Error("Resposta vazia da função.")
+  return data
+}

@@ -6,6 +6,7 @@ import {
 import { toast } from "sonner"
 
 import {
+  buscarLicaoCpad,
   createAula,
   createMatriculas,
   createTrimestreComTurma,
@@ -239,6 +240,18 @@ export function useUpdateAula() {
     },
     onError: (error) =>
       toast.error("Não foi possível salvar.", {
+        description: errorDescription(error),
+      }),
+  })
+}
+
+/** Busca a lição da CPAD (Edge Function). O componente persiste o resultado. */
+export function useBuscarLicao() {
+  return useMutation({
+    mutationFn: (params: { ano: number; trimestre: number; licao: number }) =>
+      buscarLicaoCpad(params),
+    onError: (error) =>
+      toast.error("Não foi possível buscar a lição.", {
         description: errorDescription(error),
       }),
   })
