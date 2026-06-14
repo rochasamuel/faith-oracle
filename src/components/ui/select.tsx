@@ -63,7 +63,10 @@ function SelectContent({
   sideOffset = 4,
   align = "center",
   alignOffset = 0,
-  alignItemWithTrigger = true,
+  // O alinhamento "item com trigger" (sobrepõe o trigger ao estilo <select> nativo)
+  // força uma medição do popup em altura cheia que, no mobile, provoca um scroll/
+  // salto visível antes de recolher. Desligamos: dropdown ancorado normal.
+  alignItemWithTrigger = false,
   ...props
 }: SelectPrimitive.Popup.Props &
   Pick<
