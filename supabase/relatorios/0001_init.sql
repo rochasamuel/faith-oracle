@@ -1,13 +1,14 @@
 -- =============================================================================
--- Faith Oracle — Modelagem do módulo Relatórios
+-- Faith Oracle — Relatórios · 0001 init (relatórios financeiros)
 -- Banco de dados: PostgreSQL (Supabase)
 --
--- Depende de supabase/schema.sql (usa a função public.set_updated_at, recriada
--- aqui de forma idempotente para que este arquivo seja autossuficiente).
+-- A função public.set_updated_at() é recriada aqui de forma idempotente para
+-- que este arquivo seja autossuficiente (também definida em financeiro/0001).
 --
 -- Como aplicar:
---   1. Abra o SQL Editor do seu projeto Supabase.
---   2. Cole e execute este arquivo.
+--   1. Abra o SQL Editor do projeto Supabase.
+--   2. Cole e execute este arquivo (re-executável: usa "if not exists").
+--   (para recriar do zero durante mudanças, rode relatorios/reset.sql antes.)
 -- =============================================================================
 
 create extension if not exists "pgcrypto";

@@ -1,8 +1,9 @@
 -- =============================================================================
--- Faith Oracle — Cadastro de membros da igreja
+-- Faith Oracle — Igreja · 0002 cadastro de membros
 -- Banco: PostgreSQL (Supabase)
--- Como aplicar: cole e execute no SQL Editor do projeto Supabase.
--- Pré-requisito: schema.sql (função public.set_updated_at).
+--
+-- Pré-requisito: igreja/0001_church_info.sql (função public.set_updated_at).
+-- Como aplicar: cole e execute no SQL Editor (re-executável: usa "if not exists").
 -- =============================================================================
 
 -- Estado civil do membro.
@@ -60,7 +61,7 @@ create table if not exists public.members (
 
   -- Dados pessoais
   nome_completo           text                not null,
-  -- Caminho da foto no bucket member-photos (ver members-foto.sql).
+  -- Caminho da foto no bucket member-photos (ver igreja/0003_membros_foto.sql).
   foto_path               text,
   data_nascimento         date,
   naturalidade            text,

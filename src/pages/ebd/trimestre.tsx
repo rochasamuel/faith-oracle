@@ -35,7 +35,7 @@ export default function EbdTrimestrePage() {
         <div>
           <h1 className="font-heading text-lg font-medium">Trimestre / Turma</h1>
           <p className="text-xs text-muted-foreground">
-            {turma?.nome ?? "Turma"} — período, revista e tema de cada trimestre.
+            {turma?.nome ?? "Turma"} — período e revista de cada trimestre.
           </p>
         </div>
         <TrimestreDialog turmaId={turma?.id} />
@@ -146,7 +146,6 @@ function TrimestreCard({
             <BookOpenIcon className="size-4" />
             {tt.revista_titulo || "Sem revista"}
           </span>
-          {tt.tema && <span className="text-muted-foreground">Tema: {tt.tema}</span>}
           <span className="text-muted-foreground">
             Revistas compradas: <span className="tabular-nums">{tt.revistas_compradas}</span>
           </span>

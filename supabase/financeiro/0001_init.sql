@@ -1,11 +1,14 @@
 -- =============================================================================
--- Faith Oracle — Modelagem do módulo Financeiro
+-- Faith Oracle — Financeiro · 0001 init (transações + função set_updated_at)
 -- Banco de dados: PostgreSQL (Supabase)
 --
+-- Define a função public.set_updated_at(), compartilhada com os demais módulos.
+--
 -- Como aplicar:
---   1. Abra o SQL Editor do seu projeto Supabase.
---   2. Cole e execute este arquivo.
---   (ou) supabase db push / supabase migration, caso use a CLI.
+--   1. Abra o SQL Editor do projeto Supabase.
+--   2. Cole e execute este arquivo (re-executável: usa "if not exists").
+--   3. Em seguida, financeiro/0002_marcos_conciliacoes.sql.
+--   (para recriar do zero durante mudanças, rode financeiro/reset.sql antes.)
 -- =============================================================================
 
 -- Extensão para gerar UUIDs (já habilitada por padrão no Supabase, mas garantimos).

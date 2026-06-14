@@ -44,7 +44,6 @@ const schema = z.object({
     .max(2100, "Ano inválido."),
   numero: z.number().int().min(1).max(4),
   revista_titulo: z.string().max(200).optional(),
-  tema: z.string().max(200).optional(),
   revistas_compradas: z
     .number()
     .int()
@@ -77,7 +76,6 @@ export function TrimestreDialog({ turmaId, editing }: TrimestreDialogProps) {
     editing?.trimestre ? parseISO(editing.trimestre.data_fim) : undefined
   )
   const [revista, setRevista] = React.useState(editing?.revista_titulo ?? "")
-  const [tema, setTema] = React.useState(editing?.tema ?? "")
   const [revistasCompradas, setRevistasCompradas] = React.useState(
     editing?.revistas_compradas ?? 0
   )
@@ -93,7 +91,6 @@ export function TrimestreDialog({ turmaId, editing }: TrimestreDialogProps) {
       ano,
       numero,
       revista_titulo: revista.trim() || undefined,
-      tema: tema.trim() || undefined,
       revistas_compradas: revistasCompradas,
     })
 
@@ -119,7 +116,6 @@ export function TrimestreDialog({ turmaId, editing }: TrimestreDialogProps) {
       data_inicio: dateToISO(inicio!),
       data_fim: dateToISO(fim!),
       revista_titulo: result.data!.revista_titulo ?? null,
-      tema: result.data!.tema ?? null,
       revistas_compradas: result.data!.revistas_compradas,
     }
 
@@ -163,7 +159,7 @@ export function TrimestreDialog({ turmaId, editing }: TrimestreDialogProps) {
             {isEditing ? "Editar trimestre" : "Novo trimestre"}
           </DialogTitle>
           <DialogDescription>
-            Período, revista e tema da turma neste trimestre.
+            Período e revista da turma neste trimestre.
           </DialogDescription>
         </DialogHeader>
 
@@ -226,17 +222,6 @@ export function TrimestreDialog({ turmaId, editing }: TrimestreDialogProps) {
               placeholder="Título da revista do trimestre"
               value={revista}
               onChange={(e) => setRevista(e.target.value)}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="tema">Tema (opcional)</Label>
-            <Input
-              id="tema"
-              className="h-9 text-sm"
-              placeholder="Tema do trimestre"
-              value={tema}
-              onChange={(e) => setTema(e.target.value)}
             />
           </div>
 

@@ -1,9 +1,25 @@
 -- =============================================================================
--- Faith Oracle — Marcos de saldo e conciliações.
--- Depende de schema.sql (usa public.set_updated_at). Aplicar no SQL Editor.
+-- Faith Oracle — Financeiro · 0002 marcos de saldo e conciliações
+-- Banco de dados: PostgreSQL (Supabase)
+--
+-- Depende de financeiro/0001_init.sql (tabela transactions e função
+-- public.set_updated_at, recriada aqui de forma idempotente para autossuficiência).
+--
+-- Como aplicar: cole e execute no SQL Editor (re-executável: usa "if not exists").
 -- =============================================================================
 
 create extension if not exists "pgcrypto";
+
+-- Mantém updated_at sincronizado (compartilhada com os demais módulos).
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
 
 -- -----------------------------------------------------------------------------
 -- Tabela: balance_checkpoints (saldo REAL da conta em uma data, em centavos)

@@ -1,8 +1,9 @@
 -- =============================================================================
--- Faith Oracle — Foto dos membros (avatar)
+-- Faith Oracle — Igreja · 0003 foto dos membros (avatar)
 -- Banco: PostgreSQL (Supabase)
--- Como aplicar: cole e execute no SQL Editor do projeto Supabase.
--- Pré-requisito: members.sql.
+--
+-- Pré-requisito: igreja/0002_membros.sql.
+-- Como aplicar: cole e execute no SQL Editor (re-executável: usa "if not exists").
 -- =============================================================================
 
 -- Caminho do arquivo da foto no bucket member-photos (null = sem foto).

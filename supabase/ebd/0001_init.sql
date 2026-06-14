@@ -14,7 +14,8 @@
 -- Como aplicar:
 --   1. Abra o SQL Editor do projeto Supabase.
 --   2. Cole e execute este arquivo (re-executável: usa "if not exists").
---   (para recriar do zero durante mudanças, rode supabase/ebd/reset.sql antes.)
+--   3. Em seguida, ebd/0002_remove_tema.sql.
+--   (para recriar do zero durante mudanças, rode ebd/reset.sql antes.)
 -- =============================================================================
 
 create extension if not exists "pgcrypto";
@@ -92,7 +93,7 @@ create table if not exists public.ebd_trimestres (
   constraint ebd_trimestres_periodo_ordem check (data_fim >= data_inicio)
 );
 
-comment on table public.ebd_trimestres is 'Trimestres da igreja (4 por ano). A revista/tema ficam por turma em ebd_turma_trimestres.';
+comment on table public.ebd_trimestres is 'Trimestres da igreja (4 por ano). A revista fica por turma em ebd_turma_trimestres.';
 
 create unique index if not exists ebd_trimestres_ano_numero_key
   on public.ebd_trimestres (org_id, ano, numero) nulls not distinct;
@@ -105,7 +106,7 @@ create trigger ebd_trimestres_set_updated_at
 
 -- -----------------------------------------------------------------------------
 -- Tabela: ebd_turma_trimestres (a turma rodando num trimestre = espinha dorsal)
--- É aqui que moram a revista e o tema daquela turma naquele trimestre.
+-- É aqui que mora a revista daquela turma naquele trimestre.
 -- -----------------------------------------------------------------------------
 create table if not exists public.ebd_turma_trimestres (
   id                 uuid        primary key default gen_random_uuid(),
@@ -113,7 +114,6 @@ create table if not exists public.ebd_turma_trimestres (
   turma_id           uuid        not null references public.ebd_turmas (id)     on delete cascade,
   trimestre_id       uuid        not null references public.ebd_trimestres (id) on delete cascade,
   revista_titulo     text,
-  tema               text,
   -- Quantidade de revistas compradas para a turma neste trimestre.
   revistas_compradas int         not null default 0 check (revistas_compradas >= 0),
   created_at         timestamptz not null default now(),
@@ -122,7 +122,7 @@ create table if not exists public.ebd_turma_trimestres (
   constraint ebd_turma_trimestres_unica unique (turma_id, trimestre_id)
 );
 
-comment on table  public.ebd_turma_trimestres is 'Uma turma rodando num trimestre; carrega revista, tema e revistas compradas. Matrículas e aulas penduram aqui.';
+comment on table  public.ebd_turma_trimestres is 'Uma turma rodando num trimestre; carrega revista e revistas compradas. Matrículas e aulas penduram aqui.';
 
 create index if not exists ebd_turma_trimestres_turma_idx     on public.ebd_turma_trimestres (turma_id);
 create index if not exists ebd_turma_trimestres_trimestre_idx on public.ebd_turma_trimestres (trimestre_id);

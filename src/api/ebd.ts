@@ -36,7 +36,6 @@ export interface EbdTurmaTrimestre {
   turma_id: string
   trimestre_id: string
   revista_titulo: string | null
-  tema: string | null
   revistas_compradas: number
   created_at: string
   updated_at: string
@@ -150,12 +149,11 @@ export interface NovoTrimestre {
   data_inicio: string
   data_fim: string
   revista_titulo: string | null
-  tema: string | null
   revistas_compradas: number
 }
 
 /**
- * Cria um trimestre e já vincula a turma a ele (com revista/tema). Devolve a
+ * Cria um trimestre e já vincula a turma a ele (com revista). Devolve a
  * linha turma_trimestre com o trimestre embutido.
  */
 export async function createTrimestreComTurma(
@@ -180,7 +178,6 @@ export async function createTrimestreComTurma(
       turma_id: payload.turma_id,
       trimestre_id: trimestre.id,
       revista_titulo: payload.revista_titulo,
-      tema: payload.tema,
       revistas_compradas: payload.revistas_compradas,
     })
     .select("*, trimestre:ebd_trimestres(*)")
@@ -196,7 +193,6 @@ export interface EditarTrimestre {
   data_inicio: string
   data_fim: string
   revista_titulo: string | null
-  tema: string | null
   revistas_compradas: number
 }
 
@@ -222,7 +218,6 @@ export async function updateTrimestreComTurma(
     .from("ebd_turma_trimestres")
     .update({
       revista_titulo: payload.revista_titulo,
-      tema: payload.tema,
       revistas_compradas: payload.revistas_compradas,
     })
     .eq("id", turmaTrimestreId)

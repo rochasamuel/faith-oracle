@@ -1,8 +1,26 @@
 -- =============================================================================
--- Faith Oracle — Dados institucionais da igreja (editáveis no app)
+-- Faith Oracle — Igreja · 0001 dados institucionais (editáveis no app)
 -- Banco: PostgreSQL (Supabase)
--- Como aplicar: cole e execute no SQL Editor do projeto Supabase.
+--
+-- Define a função public.set_updated_at() de forma idempotente (autossuficiência).
+--
+-- Como aplicar:
+--   1. Abra o SQL Editor do projeto Supabase.
+--   2. Cole e execute este arquivo (re-executável: usa "if not exists").
+--   3. Em seguida, igreja/0002_membros.sql e igreja/0003_membros_foto.sql.
+--   (para recriar do zero durante mudanças, rode igreja/reset.sql antes.)
 -- =============================================================================
+
+-- Mantém updated_at sincronizado (compartilhada com os demais módulos).
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
 
 -- Tipo de imóvel onde a igreja funciona.
 do $$
@@ -37,7 +55,7 @@ comment on column public.church_info.org_id is 'Reservado para tenancy futura; u
 create unique index if not exists church_info_org_id_key
   on public.church_info (org_id) nulls not distinct;
 
--- Mantém updated_at sincronizado (reaproveita a função criada em schema.sql).
+-- Mantém updated_at sincronizado (função definida no topo deste arquivo).
 drop trigger if exists church_info_set_updated_at on public.church_info;
 create trigger church_info_set_updated_at
   before update on public.church_info

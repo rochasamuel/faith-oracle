@@ -1,5 +1,6 @@
 import { Outlet } from "react-router";
 
+import { AppBreadcrumb } from "./components/app-breadcrumb";
 import { AppSidebar } from "./components/app-sidebar";
 import {
   SidebarInset,
@@ -15,8 +16,8 @@ export default function Layout() {
       <SidebarInset>
         <header className="flex h-12 shrink-0 items-center gap-2 border-b border-border px-3">
           <SidebarTrigger />
-          <Separator orientation="vertical" className="mr-1 h-4" />
-          <span className="font-heading text-sm font-medium">Financeiro</span>
+          <Separator orientation="vertical" className="mr-1" />
+          <AppBreadcrumb />
         </header>
         <main className="flex-1 overflow-auto">
           <Outlet />
