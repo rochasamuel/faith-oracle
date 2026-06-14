@@ -15,6 +15,10 @@ import RelatoriosPage from './pages/relatorios/index.tsx'
 import InformacoesPage from './pages/igreja/informacoes.tsx'
 import MembrosPage from './pages/igreja/membros.tsx'
 import MembroFormPage from './pages/igreja/membro-form-page.tsx'
+import EbdDiasPage from './pages/ebd/dias.tsx'
+import EbdDiaPage from './pages/ebd/dia.tsx'
+import EbdMatriculasPage from './pages/ebd/matriculas.tsx'
+import EbdTrimestrePage from './pages/ebd/trimestre.tsx'
 
 const queryClient = new QueryClient()
 
@@ -35,6 +39,10 @@ const router = createBrowserRouter([
           { path: 'igreja/membros', element: <MembrosPage /> },
           { path: 'igreja/membros/novo', element: <MembroFormPage /> },
           { path: 'igreja/membros/:id/editar', element: <MembroFormPage /> },
+          { path: 'ebd/dias', element: <EbdDiasPage /> },
+          { path: 'ebd/dias/:id', element: <EbdDiaPage /> },
+          { path: 'ebd/matriculas', element: <EbdMatriculasPage /> },
+          { path: 'ebd/trimestre', element: <EbdTrimestrePage /> },
         ],
       },
     ],

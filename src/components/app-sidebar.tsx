@@ -16,7 +16,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { useSession } from "@/features/acesso/use-session"
-import { WalletIcon, ChurchIcon } from "lucide-react"
+import { WalletIcon, ChurchIcon, BookOpenIcon } from "lucide-react"
 
 const data = {
   navMain: [
@@ -59,6 +59,29 @@ const data = {
         {
           title: "Membros",
           url: "/igreja/membros",
+        },
+      ],
+    },
+    {
+      title: "EBD",
+      url: "/ebd/dias",
+      icon: (
+        <BookOpenIcon
+        />
+      ),
+      isActive: true,
+      items: [
+        {
+          title: "Dias",
+          url: "/ebd/dias",
+        },
+        {
+          title: "Matrículas",
+          url: "/ebd/matriculas",
+        },
+        {
+          title: "Trimestre / Turma",
+          url: "/ebd/trimestre",
         },
       ],
     },
