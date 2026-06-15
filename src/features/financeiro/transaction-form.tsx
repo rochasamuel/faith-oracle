@@ -43,6 +43,7 @@ const schema = z.object({
     "missoes",
     "manutencao",
     "construcao",
+    "insumos",
     "outros",
   ]),
   amountCents: z.number().int().positive("Informe um valor maior que zero."),

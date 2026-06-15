@@ -40,6 +40,7 @@ begin
       'missoes',
       'manutencao',
       'construcao',
+      'insumos',
       'outros'
     );
   end if;

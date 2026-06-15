@@ -15,6 +15,7 @@ export type TransactionCategory =
   | "missoes"
   | "manutencao"
   | "construcao"
+  | "insumos"
   | "outros"
 
 export const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
@@ -32,6 +33,7 @@ export const TRANSACTION_CATEGORY_LABELS: Record<TransactionCategory, string> = 
   missoes: "Missões",
   manutencao: "Manutenção",
   construcao: "Construção",
+  insumos: "Insumos",
   outros: "Outros",
 }
 
