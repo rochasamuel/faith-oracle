@@ -2,7 +2,13 @@ import * as React from "react"
 import { useNavigate } from "react-router"
 import { z } from "zod"
 import { ptBR } from "date-fns/locale"
-import { ArrowDownCircleIcon, ArrowUpCircleIcon, CalendarIcon } from "lucide-react"
+import { toast } from "sonner"
+import {
+  AlertTriangleIcon,
+  ArrowDownCircleIcon,
+  ArrowUpCircleIcon,
+  CalendarIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -21,7 +27,13 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
+import { formatBRL } from "@/lib/currency"
 import { dateToISO, formatDateBR } from "@/lib/date"
+import {
+  findDuplicateTransactions,
+  type NewTransaction,
+  type Transaction,
+} from "@/api/transactions"
 import { CurrencyInput } from "@/features/financeiro/currency-input"
 import {
   TRANSACTION_CATEGORIES,
@@ -75,8 +87,30 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps = 
   const [dateOpen, setDateOpen] = React.useState(false)
   const [notes, setNotes] = React.useState("")
   const [errors, setErrors] = React.useState<FieldErrors>({})
+  const [isChecking, setIsChecking] = React.useState(false)
+  // Aviso de duplicidade atrelado aos campos que o geraram: se o usuário
+  // alterar tipo, categoria, valor ou data, o aviso deixa de valer.
+  const [duplicateWarning, setDuplicateWarning] = React.useState<{
+    key: string
+    matches: Transaction[]
+  } | null>(null)
 
-  function handleSubmit(event: React.FormEvent) {
+  const currentKey = [
+    type,
+    category,
+    amountCents,
+    date ? dateToISO(date) : "",
+  ].join("|")
+  const duplicates =
+    duplicateWarning?.key === currentKey ? duplicateWarning.matches : null
+
+  function save(payload: NewTransaction) {
+    createTransaction.mutate(payload, {
+      onSuccess: () => handleDone(),
+    })
+  }
+
+  async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
 
     const result = schema.safeParse({
@@ -101,18 +135,37 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps = 
     }
 
     setErrors({})
-    createTransaction.mutate(
-      {
-        type: result.data!.type,
-        category: result.data!.category,
-        amount: result.data!.amountCents,
-        occurred_at: dateToISO(date!),
-        notes: result.data!.notes ?? null,
-      },
-      {
-        onSuccess: () => handleDone(),
+    const payload: NewTransaction = {
+      type: result.data!.type,
+      category: result.data!.category,
+      amount: result.data!.amountCents,
+      occurred_at: dateToISO(date!),
+      notes: result.data!.notes ?? null,
+    }
+
+    // Já avisado sobre duplicidade para estes mesmos campos: confirma o envio.
+    if (duplicates) {
+      save(payload)
+      return
+    }
+
+    setIsChecking(true)
+    try {
+      const matches = await findDuplicateTransactions(payload)
+      if (matches.length > 0) {
+        setDuplicateWarning({ key: currentKey, matches })
+        return
       }
-    )
+    } catch (error) {
+      toast.error("Não foi possível verificar duplicidade.", {
+        description: error instanceof Error ? error.message : undefined,
+      })
+      return
+    } finally {
+      setIsChecking(false)
+    }
+
+    save(payload)
   }
 
   return (
@@ -246,6 +299,24 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps = 
         )}
       </div>
 
+      {duplicates && (
+        <div className="flex gap-3 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
+          <AlertTriangleIcon className="size-4 shrink-0" />
+          <div className="flex flex-col gap-1">
+            <p className="font-medium">Possível lançamento duplicado</p>
+            <p>
+              {duplicates.length === 1
+                ? "Já existe um lançamento"
+                : `Já existem ${duplicates.length} lançamentos`}{" "}
+              de {type === "entrada" ? "entrada" : "saída"} em{" "}
+              {TRANSACTION_CATEGORY_LABELS[category!]} no valor de{" "}
+              {formatBRL(amountCents)} em {formatDateBR(date!)}. Confira antes
+              de continuar ou clique em "Registrar mesmo assim".
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="flex justify-end gap-2">
         <Button
           type="button"
@@ -254,8 +325,18 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps = 
         >
           Cancelar
         </Button>
-        <Button type="submit" disabled={createTransaction.isPending}>
-          {createTransaction.isPending ? "Salvando..." : "Registrar lançamento"}
+        <Button
+          type="submit"
+          variant={duplicates ? "destructive" : "default"}
+          disabled={isChecking || createTransaction.isPending}
+        >
+          {createTransaction.isPending
+            ? "Salvando..."
+            : isChecking
+              ? "Verificando..."
+              : duplicates
+                ? "Registrar mesmo assim"
+                : "Registrar lançamento"}
         </Button>
       </div>
     </form>

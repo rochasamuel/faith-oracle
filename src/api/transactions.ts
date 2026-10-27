@@ -71,6 +71,26 @@ export async function createTransaction(
   return data
 }
 
+/**
+ * Busca lançamentos possivelmente duplicados: mesmo tipo (entrada/saída),
+ * mesma categoria, mesmo valor e mesma data.
+ */
+export async function findDuplicateTransactions(
+  payload: Pick<NewTransaction, "type" | "category" | "amount" | "occurred_at">
+): Promise<Transaction[]> {
+  const { data, error } = await supabase
+    .from(TABLE)
+    .select("*")
+    .eq("type", payload.type)
+    .eq("category", payload.category)
+    .eq("amount", payload.amount)
+    .eq("occurred_at", payload.occurred_at)
+    .order("created_at", { ascending: false })
+
+  if (error) throw error
+  return data ?? []
+}
+
 /** Remove um lançamento pelo id. */
 export async function deleteTransaction(id: string): Promise<void> {
   const { error } = await supabase.from(TABLE).delete().eq("id", id)
