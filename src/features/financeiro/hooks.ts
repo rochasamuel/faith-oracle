@@ -3,6 +3,7 @@ import { toast } from "sonner"
 
 import {
   createTransaction,
+  createTransactions,
   deleteTransaction,
   listTransactions,
 } from "@/api/transactions"
@@ -29,6 +30,28 @@ export function useCreateTransaction() {
     },
     onError: (error) => {
       toast.error("Não foi possível registrar o lançamento.", {
+        description: error instanceof Error ? error.message : undefined,
+      })
+    },
+  })
+}
+
+/** Importa vários lançamentos (CSV) e invalida a listagem. */
+export function useImportTransactions() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: createTransactions,
+    onSuccess: (rows) => {
+      queryClient.invalidateQueries({ queryKey: transactionsKey })
+      toast.success(
+        rows.length === 1
+          ? "1 lançamento importado."
+          : `${rows.length} lançamentos importados.`
+      )
+    },
+    onError: (error) => {
+      toast.error("Não foi possível importar os lançamentos.", {
         description: error instanceof Error ? error.message : undefined,
       })
     },

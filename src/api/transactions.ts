@@ -71,6 +71,16 @@ export async function createTransaction(
   return data
 }
 
+/** Cria vários lançamentos de uma vez (importação CSV). */
+export async function createTransactions(
+  payloads: NewTransaction[]
+): Promise<Transaction[]> {
+  const { data, error } = await supabase.from(TABLE).insert(payloads).select()
+
+  if (error) throw error
+  return data ?? []
+}
+
 /**
  * Busca lançamentos possivelmente duplicados: mesmo tipo (entrada/saída),
  * mesma categoria, mesmo valor e mesma data.

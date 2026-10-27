@@ -4,6 +4,7 @@ import { SearchXIcon, WalletIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { NewTransactionDialog } from "@/features/financeiro/new-transaction-dialog"
+import { ImportCsvDialog } from "@/features/financeiro/import-csv-dialog"
 import {
   Card,
   CardContent,
@@ -101,7 +102,10 @@ export default function LancamentosPage() {
             Entradas e saídas financeiras registradas.
           </p>
         </div>
-        <NewTransactionDialog />
+        <div className="flex flex-wrap justify-end gap-2">
+          <ImportCsvDialog />
+          <NewTransactionDialog />
+        </div>
       </div>
 
       {/* Resumo */}
