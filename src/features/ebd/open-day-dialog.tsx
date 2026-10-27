@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -123,49 +124,60 @@ export function OpenDayDialog({ turmaTrimestres }: OpenDayDialogProps) {
         render={
           <Button>
             <CalendarPlusIcon />
-            Abrir dia
+            Abrir dia de aula
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Abrir dia da EBD</DialogTitle>
+          <DialogTitle>Abrir dia de aula</DialogTitle>
           <DialogDescription>
-            Escolha o trimestre e a data. Você pode registrar a frequência e as
-            métricas em seguida.
+            Confira o trimestre e a data. Depois de abrir, você faz a chamada e
+            lança os números do dia.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
           <div className="flex flex-col gap-2">
-            <Label>Trimestre</Label>
+            <Label htmlFor="abrir-dia-trimestre">Trimestre</Label>
             <TrimestreSelect
+              id="abrir-dia-trimestre"
               items={turmaTrimestres}
               value={trimestreId}
               onValueChange={handleTrimestre}
-              className="w-full"
+              className="sm:w-full"
             />
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Data</Label>
+            <Label htmlFor="abrir-dia-data">Data da aula</Label>
             <DateField
+              id="abrir-dia-data"
               value={data}
               onChange={setData}
               invalid={!!error}
               min={min}
               max={max}
             />
-            {error && <p className="text-xs text-destructive">{error}</p>}
+            {error ? (
+              <p className="text-sm font-semibold text-destructive" role="alert">
+                {error}
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                Pode ser hoje ou um domingo que já passou.
+              </p>
+            )}
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid gap-5 sm:grid-cols-[10rem_1fr]">
             <div className="flex flex-col gap-2">
               <Label htmlFor="licao">Nº da lição (opcional)</Label>
               <Input
                 id="licao"
                 inputMode="numeric"
-                className="h-9 text-sm"
+                className="num"
+                placeholder="Ex.: 4"
                 value={licao}
                 onChange={(e) => setLicao(e.target.value.replace(/\D/g, ""))}
               />
@@ -174,7 +186,6 @@ export function OpenDayDialog({ turmaTrimestres }: OpenDayDialogProps) {
               <Label htmlFor="professor">Professor (opcional)</Label>
               <Input
                 id="professor"
-                className="h-9 text-sm"
                 placeholder="Nome do professor"
                 value={professor}
                 onChange={(e) => setProfessor(e.target.value)}
@@ -182,14 +193,15 @@ export function OpenDayDialog({ turmaTrimestres }: OpenDayDialogProps) {
             </div>
           </div>
 
-          <div className="flex justify-end gap-2">
+          <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
             <Button type="submit" disabled={createAula.isPending}>
-              {createAula.isPending ? "Abrindo..." : "Abrir dia"}
+              <CalendarPlusIcon />
+              {createAula.isPending ? "Abrindo..." : "Abrir o dia"}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

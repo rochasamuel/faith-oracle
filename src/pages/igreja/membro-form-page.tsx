@@ -1,6 +1,8 @@
-import { useNavigate, useParams } from "react-router"
+import { Link, useNavigate, useParams } from "react-router"
+import { UserXIcon } from "lucide-react"
 
-import { Card, CardContent } from "@/components/ui/card"
+import { EmptyState, Page, PageHeader } from "@/components/page"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { MemberInput } from "@/api/members"
 import { MemberForm } from "@/features/igreja/member-form"
@@ -34,30 +36,39 @@ export default function MembroFormPage() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 sm:p-6">
-      <div>
-        <h1 className="font-heading text-lg font-medium">
-          {isEditing ? "Editar membro" : "Novo membro"}
-        </h1>
-        <p className="text-xs text-muted-foreground">
-          {isEditing
-            ? "Atualize os dados do membro. Apenas o nome completo é obrigatório."
-            : "Preencha os dados do membro. Apenas o nome completo é obrigatório."}
-        </p>
-      </div>
+    <Page width="narrow">
+      <PageHeader
+        back={{ to: "/igreja/membros", label: "Membros" }}
+        title={isEditing ? "Editar membro" : "Novo membro"}
+        folio={isEditing && member ? member.nome_completo : undefined}
+        description={
+          isEditing
+            ? "Atualize os dados e toque em “Salvar alterações”."
+            : "Preencha o que souber. Os outros dados podem ser completados depois."
+        }
+      />
 
       {isEditing && isLoading ? (
-        <div className="flex flex-col gap-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-40 w-full" />
+        <div className="flex flex-col gap-8">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex flex-col gap-4">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
           ))}
         </div>
       ) : isEditing && (isError || !member) ? (
-        <Card>
-          <CardContent className="py-8 text-center text-sm text-destructive">
-            Não foi possível carregar o membro.
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={UserXIcon}
+          title="Membro não encontrado"
+          description="Não foi possível carregar este cadastro. Ele pode ter sido removido, ou a internet caiu."
+          action={
+            <Button render={<Link to="/igreja/membros" />}>
+              Voltar para a lista de membros
+            </Button>
+          }
+        />
       ) : (
         <MemberForm
           member={member ?? undefined}
@@ -66,6 +77,6 @@ export default function MembroFormPage() {
           isSubmitting={createMember.isPending || updateMember.isPending}
         />
       )}
-    </div>
+    </Page>
   )
 }

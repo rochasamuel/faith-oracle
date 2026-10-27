@@ -14,6 +14,7 @@ import {
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { formatBRL } from "@/lib/currency"
+import { cn } from "@/lib/utils"
 import {
   CSV_TEMPLATE,
   duplicateKey,
@@ -70,41 +71,66 @@ export function ImportCsvDialog() {
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={<Button variant="outline" />}>
-        <FileUpIcon />
+        <FileUpIcon aria-hidden />
         Importar CSV
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Importar lançamentos (CSV)</DialogTitle>
+          <DialogTitle>Importar lançamentos de uma planilha</DialogTitle>
           <DialogDescription>
-            Cole as linhas separadas por ponto e vírgula (;) ou copiadas de uma
-            planilha. O cabeçalho é opcional. Tipo: entrada ou saida.
-            Categoria: nome ou código (ex.: dizimos, despesas_fixas).
+            Copie as linhas da planilha e cole abaixo. Uma linha por
+            lançamento, com as colunas separadas por ponto e vírgula (;) ou
+            tabulação. O cabeçalho é opcional.
           </DialogDescription>
         </DialogHeader>
 
+        <ul className="flex flex-col gap-1 text-base text-muted-foreground">
+          <li>
+            <strong className="font-semibold text-foreground">Colunas:</strong>{" "}
+            data; tipo; categoria; valor; observação
+          </li>
+          <li>
+            <strong className="font-semibold text-foreground">Tipo:</strong>{" "}
+            entrada ou saida
+          </li>
+          <li>
+            <strong className="font-semibold text-foreground">Categoria:</strong>{" "}
+            o nome ou o código (ex.: dizimos, despesas_fixas)
+          </li>
+        </ul>
+
         <div className="flex flex-col gap-2">
-          <Label htmlFor="csv">Conteúdo CSV</Label>
+          <Label htmlFor="csv">Linhas para importar</Label>
           <Textarea
             id="csv"
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={CSV_TEMPLATE}
             rows={8}
-            className="font-mono text-xs"
+            className="num"
             spellCheck={false}
+            aria-invalid={errors.length > 0}
+            aria-describedby={errors.length > 0 ? "csv-errors" : undefined}
           />
         </div>
 
         {errors.length > 0 && (
-          <div className="max-h-32 overflow-y-auto rounded-md border border-destructive/40 bg-destructive/10 p-3 text-xs text-destructive">
-            <p className="mb-1 font-medium">
-              Corrija as linhas abaixo para importar:
+          <div
+            id="csv-errors"
+            role="alert"
+            className="max-h-48 overflow-y-auto rounded-lg bg-danger-soft px-4 py-3.5 text-base text-destructive"
+          >
+            <p className="mb-1.5 font-semibold">
+              Corrija {errors.length === 1 ? "a linha abaixo" : "as linhas abaixo"}{" "}
+              para importar:
             </p>
-            <ul className="flex flex-col gap-0.5">
+            <ul className="flex flex-col gap-1 text-foreground/85">
               {errors.map((e) => (
                 <li key={e.line}>
-                  Linha {e.line}: {e.message}
+                  <span className="num font-semibold text-destructive">
+                    Linha {e.line}:
+                  </span>{" "}
+                  {e.message}
                 </li>
               ))}
             </ul>
@@ -112,26 +138,39 @@ export function ImportCsvDialog() {
         )}
 
         {duplicateCount > 0 && (
-          <div className="flex gap-3 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
-            <AlertTriangleIcon className="size-4 shrink-0" />
+          <div className="flex gap-3 rounded-lg bg-warning-soft px-4 py-3.5 text-base">
+            <AlertTriangleIcon className="mt-0.5 size-5 shrink-0 text-warning" aria-hidden />
             <p>
-              {duplicateCount === 1
-                ? "1 linha parece duplicada"
-                : `${duplicateCount} linhas parecem duplicadas`}{" "}
-              (mesmo tipo, categoria, valor e data de um lançamento existente
-              ou de outra linha). Confira antes de importar.
+              <strong className="font-semibold text-warning">
+                {duplicateCount === 1
+                  ? "1 linha parece duplicada"
+                  : `${duplicateCount} linhas parecem duplicadas`}
+              </strong>{" "}
+              (mesmo tipo, categoria, valor e data de um lançamento já
+              registrado ou de outra linha). Confira antes de importar.
             </p>
           </div>
         )}
 
         {rows.length > 0 && (
-          <p className="text-xs text-muted-foreground">
-            {rows.length === 1
-              ? "1 lançamento válido"
-              : `${rows.length} lançamentos válidos`}{" "}
-            · saldo do lote:{" "}
-            <span className="font-medium tabular-nums">{formatBRL(total)}</span>
-          </p>
+          <div className="flex items-baseline justify-between gap-4 border-y border-rule py-3">
+            <span className="text-base">
+              <span className="num font-semibold">{rows.length}</span>{" "}
+              {rows.length === 1 ? "lançamento pronto" : "lançamentos prontos"}
+            </span>
+            <span className="text-right text-base text-muted-foreground">
+              Saldo do lote{" "}
+              <span
+                className={cn(
+                  "num font-semibold",
+                  total >= 0 ? "text-success" : "text-destructive"
+                )}
+              >
+                {total >= 0 ? "+ " : "− "}
+                {formatBRL(Math.abs(total))}
+              </span>
+            </span>
+          </div>
         )}
 
         <DialogFooter>
@@ -143,11 +182,12 @@ export function ImportCsvDialog() {
             Cancelar
           </Button>
           <Button onClick={handleImport} disabled={!canImport}>
+            <FileUpIcon aria-hidden />
             {importTransactions.isPending
               ? "Importando..."
               : rows.length > 0
-                ? `Importar ${rows.length}`
-                : "Importar"}
+                ? `Importar ${rows.length} ${rows.length === 1 ? "lançamento" : "lançamentos"}`
+                : "Importar lançamentos"}
           </Button>
         </DialogFooter>
       </DialogContent>

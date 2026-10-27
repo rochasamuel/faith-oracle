@@ -86,26 +86,29 @@ export function ReconciliationDialog() {
         <DialogHeader>
           <DialogTitle>Conciliar conta digital</DialogTitle>
           <DialogDescription>
-            Informe o saldo real do banco. A diferença para o saldo do sistema
-            vira um lançamento de ajuste automaticamente.
+            Informe o saldo real do banco numa data. Se for diferente do saldo
+            do sistema, a diferença vira um lançamento de ajuste
+            automaticamente.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label>Data</Label>
+            <Label htmlFor="rec-date">Data do saldo</Label>
             <Popover open={dateOpen} onOpenChange={setDateOpen}>
               <PopoverTrigger
                 render={
                   <Button
+                    id="rec-date"
                     variant="outline"
                     aria-invalid={dateError}
+                    aria-describedby={dateError ? "rec-date-error" : undefined}
                     className={cn(
-                      "h-9 w-full justify-start gap-2 font-normal",
+                      "w-full justify-start gap-2 font-normal",
                       !date && "text-muted-foreground"
                     )}
                   >
-                    <CalendarIcon className="size-4" />
+                    <CalendarIcon aria-hidden />
                     {date ? formatDateBR(date) : "Selecione uma data"}
                   </Button>
                 }
@@ -124,23 +127,37 @@ export function ReconciliationDialog() {
               </PopoverContent>
             </Popover>
             {dateError && (
-              <p className="text-xs text-destructive">Selecione uma data.</p>
+              <p id="rec-date-error" className="text-sm text-destructive">
+                Escolha a data do saldo informado pelo banco.
+              </p>
             )}
           </div>
           <div className="flex flex-col gap-2">
             <Label htmlFor="rec-amount">Saldo real no banco</Label>
             <CurrencyInput
               id="rec-amount"
-              className="h-9 text-sm"
+              aria-describedby="rec-amount-hint"
               valueCents={amountCents}
               onValueChange={setAmountCents}
             />
+            <p id="rec-amount-hint" className="text-sm text-muted-foreground">
+              O valor que aparece no extrato ou no aplicativo do banco nesta
+              data.
+            </p>
           </div>
         </div>
 
         <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setOpen(false)}
+            disabled={create.isPending}
+          >
+            Cancelar
+          </Button>
           <Button onClick={handleConfirm} disabled={create.isPending}>
-            {create.isPending ? "Conciliando..." : "Conciliar"}
+            <ScaleIcon />
+            {create.isPending ? "Conciliando..." : "Conciliar saldo"}
           </Button>
         </DialogFooter>
       </DialogContent>

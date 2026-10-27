@@ -12,6 +12,12 @@ export const EMPTY_REPORT_FILTERS: ReportFiltersState = {
   year: "all",
 }
 
+/** Filtro inicial da página: só os relatórios conferidos. */
+export const DEFAULT_REPORT_FILTERS: ReportFiltersState = {
+  ...EMPTY_REPORT_FILTERS,
+  status: "concluido",
+}
+
 export function hasActiveReportFilters(filters: ReportFiltersState): boolean {
   return (
     filters.status !== "all" ||

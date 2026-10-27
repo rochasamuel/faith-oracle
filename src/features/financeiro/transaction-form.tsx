@@ -12,6 +12,7 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
+import { DialogFooter } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import {
   Popover,
@@ -168,40 +169,57 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps = 
     save(payload)
   }
 
+  const typeOptions: {
+    value: TransactionType
+    label: string
+    icon: typeof ArrowUpCircleIcon
+    activeClass: string
+  }[] = [
+    {
+      value: "entrada",
+      label: "Entrada",
+      icon: ArrowUpCircleIcon,
+      activeClass: "border-success bg-success-soft text-success",
+    },
+    {
+      value: "saida",
+      label: "Saída",
+      icon: ArrowDownCircleIcon,
+      activeClass: "border-destructive bg-danger-soft text-destructive",
+    },
+  ]
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
       {/* Tipo: entrada ou saída */}
       <div className="flex flex-col gap-2">
-        <Label>Tipo de lançamento</Label>
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => setType("entrada")}
-            aria-pressed={type === "entrada"}
-            className={cn(
-              "flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors",
-              type === "entrada"
-                ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                : "border-input text-muted-foreground hover:bg-accent"
-            )}
-          >
-            <ArrowUpCircleIcon className="size-4" />
-            Entrada
-          </button>
-          <button
-            type="button"
-            onClick={() => setType("saida")}
-            aria-pressed={type === "saida"}
-            className={cn(
-              "flex items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm font-medium transition-colors",
-              type === "saida"
-                ? "border-rose-500/40 bg-rose-500/10 text-rose-600 dark:text-rose-400"
-                : "border-input text-muted-foreground hover:bg-accent"
-            )}
-          >
-            <ArrowDownCircleIcon className="size-4" />
-            Saída
-          </button>
+        <Label id="tipo-label">Tipo de lançamento</Label>
+        <div
+          role="group"
+          aria-labelledby="tipo-label"
+          className="grid grid-cols-2 gap-2"
+        >
+          {typeOptions.map((opt) => {
+            const active = type === opt.value
+            const Icon = opt.icon
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setType(opt.value)}
+                aria-pressed={active}
+                className={cn(
+                  "flex h-14 items-center justify-center gap-2 rounded-lg border-2 px-3 text-lg font-semibold transition-[background-color,border-color,color] duration-150 ease-out",
+                  active
+                    ? opt.activeClass
+                    : "border-input bg-page text-muted-foreground hover:border-primary/50 hover:bg-accent hover:text-foreground"
+                )}
+              >
+                <Icon className="size-5" strokeWidth={active ? 2.5 : 2} aria-hidden />
+                {opt.label}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -210,33 +228,39 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps = 
         <Label htmlFor="amount">Valor</Label>
         <CurrencyInput
           id="amount"
-          className="h-9 text-sm"
+          className="h-14 text-xl font-semibold"
           valueCents={amountCents}
           onValueChange={setAmountCents}
           aria-invalid={!!errors.amountCents}
+          aria-describedby={errors.amountCents ? "amount-error" : undefined}
         />
         {errors.amountCents && (
-          <p className="text-xs text-destructive">{errors.amountCents}</p>
+          <p id="amount-error" className="text-sm font-semibold text-destructive">
+            {errors.amountCents}
+          </p>
         )}
       </div>
 
       {/* Data e categoria lado a lado */}
-      <div className="grid gap-5 sm:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2 sm:gap-4">
         <div className="flex flex-col gap-2">
-          <Label>Data</Label>
+          <Label id="date-label">Data</Label>
           <Popover open={dateOpen} onOpenChange={setDateOpen}>
             <PopoverTrigger
               render={
                 <Button
                   variant="outline"
+                  aria-labelledby="date-label date-value"
                   aria-invalid={!!errors.date}
                   className={cn(
-                    "h-9 w-full justify-start gap-2 font-normal",
+                    "w-full justify-start font-normal",
                     !date && "text-muted-foreground"
                   )}
                 >
-                  <CalendarIcon className="size-4" />
-                  {date ? formatDateBR(date) : "Selecione uma data"}
+                  <CalendarIcon aria-hidden />
+                  <span id="date-value" className="num">
+                    {date ? formatDateBR(date) : "Escolha o dia"}
+                  </span>
                 </Button>
               }
             />
@@ -254,7 +278,9 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps = 
             </PopoverContent>
           </Popover>
           {errors.date && (
-            <p className="text-xs text-destructive">{errors.date}</p>
+            <p className="text-sm font-semibold text-destructive">
+              {errors.date}
+            </p>
           )}
         </div>
 
@@ -267,10 +293,13 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps = 
               setCategory(value as TransactionCategory)
             }
           >
-            <SelectTrigger className="h-9 w-full" aria-invalid={!!errors.category}>
-              <SelectValue placeholder="Selecione uma categoria" />
+            <SelectTrigger
+              className="w-full data-[size=default]:h-12"
+              aria-invalid={!!errors.category}
+            >
+              <SelectValue placeholder="Escolha a categoria" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent alignItemWithTrigger={false}>
               {TRANSACTION_CATEGORIES.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
@@ -279,7 +308,9 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps = 
             </SelectContent>
           </Select>
           {errors.category && (
-            <p className="text-xs text-destructive">{errors.category}</p>
+            <p className="text-sm font-semibold text-destructive">
+              Escolha a categoria do lançamento.
+            </p>
           )}
         </div>
       </div>
@@ -289,35 +320,44 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps = 
         <Label htmlFor="notes">Observação (opcional)</Label>
         <Textarea
           id="notes"
-          placeholder="Detalhes do lançamento..."
+          placeholder="Ex.: conta de luz de outubro, oferta do culto de domingo"
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           rows={3}
+          aria-invalid={!!errors.notes}
         />
         {errors.notes && (
-          <p className="text-xs text-destructive">{errors.notes}</p>
+          <p className="text-sm font-semibold text-destructive">
+            {errors.notes} Use no máximo 500 caracteres.
+          </p>
         )}
       </div>
 
       {duplicates && (
-        <div className="flex gap-3 rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-xs text-amber-700 dark:text-amber-400">
-          <AlertTriangleIcon className="size-4 shrink-0" />
+        <div
+          role="alert"
+          className="flex gap-3 rounded-lg bg-warning-soft px-4 py-3.5 text-base text-foreground"
+        >
+          <AlertTriangleIcon className="mt-0.5 size-5 shrink-0 text-warning" aria-hidden />
           <div className="flex flex-col gap-1">
-            <p className="font-medium">Possível lançamento duplicado</p>
+            <p className="font-semibold text-warning">
+              Possível lançamento duplicado
+            </p>
             <p>
               {duplicates.length === 1
                 ? "Já existe um lançamento"
                 : `Já existem ${duplicates.length} lançamentos`}{" "}
               de {type === "entrada" ? "entrada" : "saída"} em{" "}
               {TRANSACTION_CATEGORY_LABELS[category!]} no valor de{" "}
-              {formatBRL(amountCents)} em {formatDateBR(date!)}. Confira antes
-              de continuar ou clique em "Registrar mesmo assim".
+              <span className="num font-semibold">{formatBRL(amountCents)}</span>{" "}
+              em <span className="num">{formatDateBR(date!)}</span>. Confira
+              antes de continuar ou toque em "Registrar mesmo assim".
             </p>
           </div>
         </div>
       )}
 
-      <div className="flex justify-end gap-2">
+      <DialogFooter>
         <Button
           type="button"
           variant="outline"
@@ -338,7 +378,7 @@ export function TransactionForm({ onSuccess, onCancel }: TransactionFormProps = 
                 ? "Registrar mesmo assim"
                 : "Registrar lançamento"}
         </Button>
-      </div>
+      </DialogFooter>
     </form>
   )
 }

@@ -1,7 +1,7 @@
 import * as React from "react"
 import { useNavigate } from "react-router"
 import { differenceInYears, parseISO } from "date-fns"
-import { PencilIcon } from "lucide-react"
+import { PencilIcon, Trash2Icon, UserCheckIcon, UserXIcon } from "lucide-react"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,6 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet"
-import { cn } from "@/lib/utils"
 import { dateISOToBR } from "@/lib/date"
 import type { Member } from "@/api/members"
 import {
@@ -24,15 +23,26 @@ import {
 import { MemberAvatar } from "@/features/igreja/member-avatar"
 
 /** Par rótulo/valor de leitura ("—" quando vazio). */
-function Field({ label, value }: { label: string; value?: string | null }) {
+function Field({
+  label,
+  value,
+  wide,
+}: {
+  label: string
+  value?: string | null
+  wide?: boolean
+}) {
   return (
-    <div className="flex flex-col gap-0.5">
-      <span className="text-xs text-muted-foreground">{label}</span>
-      <span className="text-sm break-words">{value || "—"}</span>
+    <div className={wide ? "flex flex-col gap-0.5 sm:col-span-2" : "flex flex-col gap-0.5"}>
+      <dt className="text-sm font-semibold text-muted-foreground">{label}</dt>
+      <dd className="text-base break-words">
+        {value || <span className="text-muted-foreground">—</span>}
+      </dd>
     </div>
   )
 }
 
+/** Bloco pautado da ficha: título em serifa e uma linha embaixo. */
 function ViewSection({
   title,
   children,
@@ -41,12 +51,14 @@ function ViewSection({
   children: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-2">
-      <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+    <section className="flex flex-col gap-3">
+      <h3 className="border-b border-rule pb-1.5 font-heading text-xl font-semibold">
         {title}
       </h3>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-3">{children}</div>
-    </div>
+      <dl className="grid grid-cols-1 gap-x-5 gap-y-3.5 sm:grid-cols-2">
+        {children}
+      </dl>
+    </section>
   )
 }
 
@@ -60,10 +72,21 @@ interface MemberViewSheetProps {
   /** Membro em visualização; null fecha o sheet. */
   member: Member | null
   onOpenChange: (open: boolean) => void
+  /** Inativar/reativar a partir da ficha (opcional). */
+  onToggleAtivo?: (member: Member) => void
+  togglingAtivo?: boolean
+  /** Pedir a remoção do cadastro a partir da ficha (opcional). */
+  onDelete?: (member: Member) => void
 }
 
-/** Painel lateral de visualização dos dados do membro (somente leitura). */
-export function MemberViewSheet({ member, onOpenChange }: MemberViewSheetProps) {
+/** Ficha do membro (somente leitura), com atalhos para editar. */
+export function MemberViewSheet({
+  member,
+  onOpenChange,
+  onToggleAtivo,
+  togglingAtivo,
+  onDelete,
+}: MemberViewSheetProps) {
   const navigate = useNavigate()
 
   const temConjuge =
@@ -75,34 +98,31 @@ export function MemberViewSheet({ member, onOpenChange }: MemberViewSheetProps) 
       <SheetContent className="data-[side=right]:w-full data-[side=right]:sm:max-w-lg">
         {member && (
           <>
-            <SheetHeader className="flex-row items-center gap-3">
+            <SheetHeader className="flex-row items-center gap-4 border-b-2 border-foreground/80 px-5 pt-5 pr-16 pb-4">
               <MemberAvatar
                 nome={member.nome_completo}
                 fotoPath={member.foto_path}
-                className="size-14 text-base"
+                className="size-16 text-lg"
               />
-              <div className="flex min-w-0 flex-col gap-1">
-                <SheetTitle className="break-words">
+              <div className="flex min-w-0 flex-col gap-1.5">
+                <SheetTitle className="leading-tight break-words">
                   {member.nome_completo}
                 </SheetTitle>
-                <SheetDescription className="flex items-center gap-2 text-xs">
+                <SheetDescription className="flex flex-wrap items-center gap-2 text-base text-muted-foreground">
                   {member.cargo?.nome || "Sem cargo"}
-                  <Badge
-                    variant="secondary"
-                    className={cn(
-                      "border",
-                      member.ativo
-                        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                        : "border-zinc-500/30 bg-zinc-500/10 text-zinc-600 dark:text-zinc-400"
-                    )}
-                  >
+                  <Badge variant={member.ativo ? "success" : "secondary"}>
                     {member.ativo ? "Ativo" : "Inativo"}
                   </Badge>
                 </SheetDescription>
               </div>
             </SheetHeader>
 
-            <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-4 pb-4">
+            <div className="flex flex-1 flex-col gap-7 overflow-y-auto px-5 pt-1 pb-5">
+              <ViewSection title="Contato">
+                <Field label="Telefone" value={member.telefone} />
+                <Field label="E-mail" value={member.email} />
+              </ViewSection>
+
               <ViewSection title="Dados pessoais">
                 <Field
                   label="Data de nascimento"
@@ -163,9 +183,7 @@ export function MemberViewSheet({ member, onOpenChange }: MemberViewSheetProps) 
               </ViewSection>
 
               <ViewSection title="Endereço">
-                <div className="col-span-2">
-                  <Field label="Endereço" value={member.endereco} />
-                </div>
+                <Field label="Endereço" value={member.endereco} wide />
                 <Field
                   label="Cidade/UF"
                   value={
@@ -176,12 +194,7 @@ export function MemberViewSheet({ member, onOpenChange }: MemberViewSheetProps) 
                 <Field label="CEP" value={member.cep} />
               </ViewSection>
 
-              <ViewSection title="Contato">
-                <Field label="Telefone" value={member.telefone} />
-                <Field label="E-mail" value={member.email} />
-              </ViewSection>
-
-              <ViewSection title="Vida eclesiástica">
+              <ViewSection title="Vida na igreja">
                 <Field
                   label="Batizado(a) nas águas"
                   value={member.batizado_aguas ? "Sim" : "Não"}
@@ -215,22 +228,56 @@ export function MemberViewSheet({ member, onOpenChange }: MemberViewSheetProps) 
                   }
                 />
               </ViewSection>
+
+              {(onToggleAtivo || onDelete) && (
+                <section className="flex flex-col gap-3">
+                  <h3 className="border-b border-rule pb-1.5 font-heading text-xl font-semibold">
+                    Situação do cadastro
+                  </h3>
+                  <p className="text-base text-muted-foreground">
+                    Inativar tira o membro da contagem oficial, sem apagar os
+                    dados.
+                  </p>
+                  <div className="flex flex-col gap-2.5 sm:flex-row">
+                    {onToggleAtivo && (
+                      <Button
+                        variant="outline"
+                        disabled={togglingAtivo}
+                        onClick={() => onToggleAtivo(member)}
+                      >
+                        {member.ativo ? <UserXIcon /> : <UserCheckIcon />}
+                        {member.ativo ? "Inativar membro" : "Reativar membro"}
+                      </Button>
+                    )}
+                    {onDelete && (
+                      <Button
+                        variant="ghost"
+                        className="text-destructive hover:bg-danger-soft"
+                        onClick={() => onDelete(member)}
+                      >
+                        <Trash2Icon />
+                        Remover cadastro
+                      </Button>
+                    )}
+                  </div>
+                </section>
+              )}
             </div>
 
-            <SheetFooter className="flex-row border-t border-border sm:justify-end">
+            <SheetFooter className="flex-row gap-2.5 border-t border-border pb-[calc(1rem+env(safe-area-inset-bottom))] sm:justify-end">
               <Button
                 variant="outline"
                 className="flex-1 sm:flex-none"
                 onClick={() => onOpenChange(false)}
               >
-                Fechar
+                Voltar
               </Button>
               <Button
                 className="flex-1 sm:flex-none"
                 onClick={() => navigate(`/igreja/membros/${member.id}/editar`)}
               >
                 <PencilIcon />
-                Editar
+                Editar dados
               </Button>
             </SheetFooter>
           </>

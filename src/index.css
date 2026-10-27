@@ -1,15 +1,35 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
-@import "@fontsource-variable/inter";
+@import "@fontsource-variable/atkinson-hyperlegible-next";
+@import "@fontsource/courier-prime/400.css";
+@import "@fontsource/courier-prime/700.css";
+@import "@fontsource-variable/source-serif-4/opsz.css";
 
 @plugin "@tailwindcss/typography";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Inter Variable', sans-serif;
+    --font-sans: 'Atkinson Hyperlegible Next Variable', ui-sans-serif, system-ui, sans-serif;
+    /* Datilografia: só nos registros (datas, valores, dados de tabela). */
+    --font-type: 'Courier Prime', ui-monospace, 'Courier New', monospace;
+    --font-heading: 'Source Serif 4 Variable', ui-serif, Georgia, serif;
+    --font-serif: 'Source Serif 4 Variable', ui-serif, Georgia, serif;
+
+    --color-cover: var(--cover);
+    --color-cover-foreground: var(--cover-foreground);
+    --color-cover-muted: var(--cover-muted);
+    --color-cover-accent: var(--cover-accent);
+    --color-rule: var(--rule);
+    --color-margin: var(--margin);
+    --color-page: var(--page);
+    --color-success: var(--success);
+    --color-success-soft: var(--success-soft);
+    --color-warning: var(--warning);
+    --color-warning-soft: var(--warning-soft);
+    --color-danger-soft: var(--danger-soft);
+
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,88 +68,205 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+
+    --animate-stamp: stamp 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/*
+ * Livro de registro: capa em tecido azul-marinho (índigo do selo), folhas
+ * brancas com pauta azul-clara e uma linha de margem vermelha.
+ */
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.141 0.005 285.823);
+    --cover: oklch(0.29 0.105 272);
+    --cover-foreground: oklch(0.97 0.012 265);
+    --cover-muted: oklch(0.80 0.045 268);
+    --cover-accent: oklch(0.37 0.12 270);
+
+    --background: oklch(0.968 0.007 265);
+    --page: oklch(1 0 0);
+    --foreground: oklch(0.23 0.045 270);
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.141 0.005 285.823);
+    --card-foreground: oklch(0.23 0.045 270);
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.141 0.005 285.823);
-    --primary: oklch(0.5 0.134 242.749);
-    --primary-foreground: oklch(0.977 0.013 236.62);
-    --secondary: oklch(0.967 0.001 286.375);
-    --secondary-foreground: oklch(0.21 0.006 285.885);
-    --muted: oklch(0.967 0.001 286.375);
-    --muted-foreground: oklch(0.552 0.016 285.938);
-    --accent: oklch(0.967 0.001 286.375);
-    --accent-foreground: oklch(0.21 0.006 285.885);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.92 0.004 286.32);
-    --input: oklch(0.92 0.004 286.32);
-    --ring: oklch(0.705 0.015 286.067);
-    --chart-1: oklch(0.828 0.111 230.318);
-    --chart-2: oklch(0.685 0.169 237.323);
-    --chart-3: oklch(0.588 0.158 241.966);
-    --chart-4: oklch(0.5 0.134 242.749);
-    --chart-5: oklch(0.443 0.11 240.79);
-    --radius: 0.45rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.141 0.005 285.823);
-    --sidebar-primary: oklch(0.588 0.158 241.966);
-    --sidebar-primary-foreground: oklch(0.977 0.013 236.62);
-    --sidebar-accent: oklch(0.967 0.001 286.375);
-    --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
-    --sidebar-border: oklch(0.92 0.004 286.32);
-    --sidebar-ring: oklch(0.705 0.015 286.067);
+    --popover-foreground: oklch(0.23 0.045 270);
+    --primary: oklch(0.46 0.175 266);
+    --primary-foreground: oklch(0.985 0.005 265);
+    --secondary: oklch(0.945 0.018 265);
+    --secondary-foreground: oklch(0.28 0.08 270);
+    --muted: oklch(0.955 0.012 265);
+    --muted-foreground: oklch(0.47 0.035 268);
+    --accent: oklch(0.94 0.025 265);
+    --accent-foreground: oklch(0.28 0.08 270);
+    --destructive: oklch(0.52 0.19 27);
+    --border: oklch(0.88 0.03 264);
+    --input: oklch(0.80 0.035 265);
+    --ring: oklch(0.55 0.17 266);
+    --rule: oklch(0.90 0.032 262);
+    --margin: oklch(0.62 0.17 25);
+
+    --success: oklch(0.48 0.12 155);
+    --success-soft: oklch(0.95 0.04 155);
+    --warning: oklch(0.50 0.12 65);
+    --warning-soft: oklch(0.96 0.05 85);
+    --danger-soft: oklch(0.955 0.03 25);
+
+    --chart-1: oklch(0.80 0.09 262);
+    --chart-2: oklch(0.66 0.14 264);
+    --chart-3: oklch(0.55 0.17 266);
+    --chart-4: oklch(0.46 0.175 266);
+    --chart-5: oklch(0.36 0.13 270);
+    --radius: 0.5rem;
+
+    --sidebar: var(--cover);
+    --sidebar-foreground: var(--cover-foreground);
+    --sidebar-primary: oklch(1 0 0);
+    --sidebar-primary-foreground: var(--cover);
+    --sidebar-accent: var(--cover-accent);
+    --sidebar-accent-foreground: var(--cover-foreground);
+    --sidebar-border: oklch(1 0 0 / 12%);
+    --sidebar-ring: oklch(0.80 0.08 265);
+
+    color-scheme: light;
 }
 
 .dark {
-    --background: oklch(0.141 0.005 285.823);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.21 0.006 285.885);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.21 0.006 285.885);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.443 0.11 240.79);
-    --primary-foreground: oklch(0.977 0.013 236.62);
-    --secondary: oklch(0.274 0.006 286.033);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.274 0.006 286.033);
-    --muted-foreground: oklch(0.705 0.015 286.067);
-    --accent: oklch(0.274 0.006 286.033);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.552 0.016 285.938);
-    --chart-1: oklch(0.828 0.111 230.318);
-    --chart-2: oklch(0.685 0.169 237.323);
-    --chart-3: oklch(0.588 0.158 241.966);
-    --chart-4: oklch(0.5 0.134 242.749);
-    --chart-5: oklch(0.443 0.11 240.79);
-    --sidebar: oklch(0.21 0.006 285.885);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.685 0.169 237.323);
-    --sidebar-primary-foreground: oklch(0.293 0.066 243.157);
-    --sidebar-accent: oklch(0.274 0.006 286.033);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --cover: oklch(0.27 0.09 272);
+    --cover-foreground: oklch(0.95 0.012 265);
+    --cover-muted: oklch(0.74 0.04 268);
+    --cover-accent: oklch(0.34 0.105 270);
+
+    --background: oklch(0.13 0.02 270);
+    --page: oklch(0.175 0.025 270);
+    --foreground: oklch(0.94 0.012 265);
+    --card: oklch(0.175 0.025 270);
+    --card-foreground: oklch(0.94 0.012 265);
+    --popover: oklch(0.23 0.035 270);
+    --popover-foreground: oklch(0.94 0.012 265);
+    --primary: oklch(0.74 0.12 264);
+    --primary-foreground: oklch(0.18 0.05 270);
+    --secondary: oklch(0.27 0.04 270);
+    --secondary-foreground: oklch(0.94 0.012 265);
+    --muted: oklch(0.24 0.03 270);
+    --muted-foreground: oklch(0.74 0.03 265);
+    --accent: oklch(0.28 0.05 268);
+    --accent-foreground: oklch(0.94 0.012 265);
+    --destructive: oklch(0.70 0.16 25);
+    --border: oklch(0.32 0.04 268);
+    --input: oklch(0.42 0.045 268);
+    --ring: oklch(0.70 0.12 264);
+    --rule: oklch(0.29 0.04 268);
+    --margin: oklch(0.58 0.14 25);
+
+    --success: oklch(0.76 0.13 155);
+    --success-soft: oklch(0.28 0.05 155);
+    --warning: oklch(0.80 0.13 80);
+    --warning-soft: oklch(0.29 0.05 75);
+    --danger-soft: oklch(0.28 0.06 25);
+
+    --chart-1: oklch(0.85 0.07 262);
+    --chart-2: oklch(0.76 0.11 264);
+    --chart-3: oklch(0.66 0.14 266);
+    --chart-4: oklch(0.56 0.16 266);
+    --chart-5: oklch(0.46 0.14 270);
+
+    --sidebar: var(--cover);
+    --sidebar-foreground: var(--cover-foreground);
+    --sidebar-primary: oklch(0.94 0.012 265);
+    --sidebar-primary-foreground: var(--cover);
+    --sidebar-accent: var(--cover-accent);
+    --sidebar-accent-foreground: var(--cover-foreground);
     --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.552 0.016 285.938);
+    --sidebar-ring: oklch(0.70 0.12 264);
+
+    color-scheme: dark;
+}
+
+@keyframes stamp {
+    0% { opacity: 0; transform: scale(1.6) rotate(-14deg); }
+    60% { opacity: 1; }
+    100% { opacity: 1; transform: scale(1) rotate(-6deg); }
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
-  body {
-    @apply bg-background text-foreground;
-    }
-  button:not(:disabled), [role="button"]:not(:disabled) {
-    cursor: pointer;
-    }
+  }
   html {
     @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-size: 1rem;
+    line-height: 1.5;
+    font-variant-numeric: lining-nums;
+  }
+  h1, h2, h3 {
+    @apply font-heading;
+    text-wrap: balance;
+  }
+  ::selection {
+    background: color-mix(in oklch, var(--primary) 22%, transparent);
+    color: var(--foreground);
+  }
+  input, textarea {
+    caret-color: var(--primary);
+  }
+  a {
+    text-underline-offset: 0.2em;
+  }
+  :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
+  button:focus-visible, a:focus-visible, [role="button"]:focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+  }
+  button:not(:disabled), [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  * {
+    scrollbar-color: color-mix(in oklch, var(--foreground) 25%, transparent) transparent;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
     }
+  }
+}
+
+@layer utilities {
+  /** Números que precisam alinhar em coluna (dinheiro, contagens). */
+  .num {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  /** Linha de margem vermelha da folha do livro de registro. */
+  .folha {
+    position: relative;
+    background: var(--page);
+  }
+  .folha::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    left: 0.75rem;
+    width: 1px;
+    background: var(--margin);
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  @media (min-width: 40rem) {
+    .folha::before { left: 1.75rem; }
+  }
+  /** Espaço para a barra de navegação inferior no celular. */
+  .pb-safe-nav {
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 64rem) {
+    .pb-safe-nav { padding-bottom: 2.5rem; }
+  }
 }

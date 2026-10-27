@@ -1,3 +1,5 @@
+import { Trash2Icon } from "lucide-react"
+
 import {
   Dialog,
   DialogContent,
@@ -27,34 +29,36 @@ export function DeleteMemberDialog({
     <Dialog open={member !== null} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Remover membro</DialogTitle>
+          <DialogTitle>Remover o cadastro deste membro?</DialogTitle>
           <DialogDescription>
-            Esta ação não pode ser desfeita. O cadastro será removido
-            permanentemente. Para apenas tirá-lo da contagem, prefira inativar.
+            O cadastro será apagado de vez e não pode ser recuperado. Para
+            apenas tirar o membro da contagem, use “Inativar membro”.
           </DialogDescription>
         </DialogHeader>
 
         {member && (
-          <div className="rounded-md border border-border bg-muted/30 p-3 text-xs">
-            <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Nome</span>
-              <span className="font-medium">{member.nome_completo}</span>
+          <dl className="flex flex-col border-t border-rule">
+            <div className="flex justify-between gap-4 border-b border-rule py-2.5">
+              <dt className="text-muted-foreground">Nome</dt>
+              <dd className="text-right font-semibold">
+                {member.nome_completo}
+              </dd>
             </div>
             {member.cargo && (
-              <div className="mt-1 flex justify-between gap-4">
-                <span className="text-muted-foreground">Cargo</span>
-                <span className="font-medium">{member.cargo.nome}</span>
+              <div className="flex justify-between gap-4 border-b border-rule py-2.5">
+                <dt className="text-muted-foreground">Cargo</dt>
+                <dd className="text-right font-semibold">{member.cargo.nome}</dd>
               </div>
             )}
             {member.data_ingresso && (
-              <div className="mt-1 flex justify-between gap-4">
-                <span className="text-muted-foreground">Ingresso</span>
-                <span className="font-medium">
+              <div className="flex justify-between gap-4 border-b border-rule py-2.5">
+                <dt className="text-muted-foreground">Ingresso</dt>
+                <dd className="num font-type text-right font-bold">
                   {dateISOToBR(member.data_ingresso)}
-                </span>
+                </dd>
               </div>
             )}
-          </div>
+          </dl>
         )}
 
         <DialogFooter>
@@ -63,10 +67,11 @@ export function DeleteMemberDialog({
             onClick={() => onOpenChange(false)}
             disabled={isDeleting}
           >
-            Cancelar
+            Voltar
           </Button>
           <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
-            {isDeleting ? "Removendo..." : "Remover"}
+            <Trash2Icon />
+            {isDeleting ? "Removendo..." : "Sim, remover cadastro"}
           </Button>
         </DialogFooter>
       </DialogContent>

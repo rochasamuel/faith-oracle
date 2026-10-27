@@ -1,7 +1,13 @@
 import * as React from "react"
-import { FileBarChartIcon } from "lucide-react"
+import { FileBarChartIcon, SearchXIcon, XIcon } from "lucide-react"
 
-import { Card, CardContent } from "@/components/ui/card"
+import {
+  EmptyState,
+  ErrorState,
+  Page,
+  PageHeader,
+  Section,
+} from "@/components/page"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button } from "@/components/ui/button"
 import { useReports } from "@/features/relatorios/hooks"
@@ -12,6 +18,7 @@ import { ReportFilters } from "@/features/relatorios/report-filters"
 import {
   applyReportFilters,
   availableYears,
+  DEFAULT_REPORT_FILTERS,
   EMPTY_REPORT_FILTERS,
   hasActiveReportFilters,
   type ReportFiltersState,
@@ -25,10 +32,10 @@ import {
 } from "@/features/relatorios/sorting"
 
 export default function RelatoriosPage() {
-  const { data, isLoading, isError, error } = useReports()
+  const { data, isLoading, isError, error, refetch } = useReports()
 
   const [filters, setFilters] =
-    React.useState<ReportFiltersState>(EMPTY_REPORT_FILTERS)
+    React.useState<ReportFiltersState>(DEFAULT_REPORT_FILTERS)
   const [sort, setSort] = React.useState<ReportSortState>(DEFAULT_REPORT_SORT)
 
   const years = React.useMemo(() => availableYears(data ?? []), [data])
@@ -46,78 +53,76 @@ export default function RelatoriosPage() {
   const filtersActive = hasActiveReportFilters(filters)
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 sm:p-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="font-heading text-lg font-medium">Relatórios</h1>
-          <p className="text-xs text-muted-foreground">
-            Relatórios financeiros gerados por período.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <ReconciliationDialog />
-          <GenerateReportDialog />
-        </div>
-      </div>
-
-      {!isEmpty && (
-        <ReportFilters value={filters} onChange={setFilters} years={years} />
-      )}
+    <Page width="wide">
+      <PageHeader
+        title="Relatórios"
+        description="Relatórios financeiros gerados por período, prontos para baixar em PDF."
+        actions={
+          <>
+            <ReconciliationDialog />
+            <GenerateReportDialog />
+          </>
+        }
+      />
 
       {isLoading ? (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3" aria-busy="true">
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-10 w-full" />
+            <Skeleton key={i} className="h-16 w-full" />
           ))}
         </div>
       ) : isError ? (
-        <Card>
-          <CardContent className="py-8 text-center text-sm text-destructive">
-            Erro ao carregar relatórios
-            {error instanceof Error ? `: ${error.message}` : "."}
-          </CardContent>
-        </Card>
-      ) : isEmpty ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <FileBarChartIcon className="size-8 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">Nenhum relatório ainda</p>
-              <p className="text-xs text-muted-foreground">
-                Gere o primeiro relatório financeiro a partir de um período.
-              </p>
-            </div>
-            <GenerateReportDialog />
-          </CardContent>
-        </Card>
-      ) : visible.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <FileBarChartIcon className="size-8 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">Nenhum resultado</p>
-              <p className="text-xs text-muted-foreground">
-                Nenhum relatório corresponde aos filtros aplicados.
-              </p>
-            </div>
-            {filtersActive && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setFilters(EMPTY_REPORT_FILTERS)}
-              >
-                Limpar filtros
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <ReportTable
-          reports={visible}
-          sort={sort}
-          onToggleSort={handleToggleSort}
+        <ErrorState
+          title="Não foi possível carregar os relatórios."
+          error={error}
+          action={
+            <Button variant="outline" onClick={() => refetch()}>
+              Tentar de novo
+            </Button>
+          }
         />
+      ) : isEmpty ? (
+        <EmptyState
+          icon={FileBarChartIcon}
+          title="Nenhum relatório ainda"
+          description="Escolha um mês (ou um ano) e gere o primeiro relatório financeiro. O resumo é calculado a partir dos lançamentos do período."
+          action={<GenerateReportDialog />}
+        />
+      ) : (
+        <Section
+          title="Relatórios gerados"
+          count={
+            filtersActive
+              ? `${visible.length} de ${data.length}`
+              : String(data.length)
+          }
+        >
+          <ReportFilters value={filters} onChange={setFilters} years={years} />
+
+          {visible.length === 0 ? (
+            <EmptyState
+              icon={SearchXIcon}
+              title="Nenhum relatório com esses filtros"
+              description="Mude o status, o tipo ou o ano, ou limpe os filtros para ver todos os relatórios."
+              action={
+                <Button
+                  variant="outline"
+                  onClick={() => setFilters(EMPTY_REPORT_FILTERS)}
+                >
+                  <XIcon />
+                  Limpar filtros
+                </Button>
+              }
+            />
+          ) : (
+            <ReportTable
+              reports={visible}
+              sort={sort}
+              onToggleSort={handleToggleSort}
+            />
+          )}
+        </Section>
       )}
-    </div>
+    </Page>
   )
 }

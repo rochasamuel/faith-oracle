@@ -43,9 +43,9 @@ export function ReportFilters({ value, onChange, years }: ReportFiltersProps) {
   }
 
   return (
-    <div className="flex flex-wrap items-end gap-3 rounded-lg border border-border bg-card p-3">
-      <div className="flex flex-col gap-1.5">
-        <Label>Status</Label>
+    <div className="grid grid-cols-1 items-end gap-4 sm:grid-cols-[repeat(3,minmax(0,1fr))_auto]">
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="report-filter-status">Status</Label>
         <Select
           items={statusItems}
           value={value.status}
@@ -53,7 +53,7 @@ export function ReportFilters({ value, onChange, years }: ReportFiltersProps) {
             onChange({ ...value, status: next as ReportStatus | "all" })
           }
         >
-          <SelectTrigger className="h-9 w-44">
+          <SelectTrigger id="report-filter-status" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -67,8 +67,8 @@ export function ReportFilters({ value, onChange, years }: ReportFiltersProps) {
         </Select>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label>Tipo</Label>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="report-filter-type">Tipo</Label>
         <Select
           items={periodTypeItems}
           value={value.periodType}
@@ -79,7 +79,7 @@ export function ReportFilters({ value, onChange, years }: ReportFiltersProps) {
             })
           }
         >
-          <SelectTrigger className="h-9 w-40">
+          <SelectTrigger id="report-filter-type" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -95,8 +95,8 @@ export function ReportFilters({ value, onChange, years }: ReportFiltersProps) {
         </Select>
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <Label>Ano de referência</Label>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="report-filter-year">Ano de referência</Label>
         <Select
           items={yearItems}
           value={value.year === "all" ? "all" : String(value.year)}
@@ -107,7 +107,7 @@ export function ReportFilters({ value, onChange, years }: ReportFiltersProps) {
             })
           }
         >
-          <SelectTrigger className="h-9 w-36">
+          <SelectTrigger id="report-filter-year" className="w-full">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -124,12 +124,11 @@ export function ReportFilters({ value, onChange, years }: ReportFiltersProps) {
       {hasActiveReportFilters(value) && (
         <Button
           variant="ghost"
-          size="sm"
-          className="h-9"
+          className="max-sm:w-full"
           onClick={() => onChange(EMPTY_REPORT_FILTERS)}
         >
           <XIcon />
-          Limpar
+          Limpar filtros
         </Button>
       )}
     </div>

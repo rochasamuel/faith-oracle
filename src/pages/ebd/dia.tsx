@@ -1,17 +1,19 @@
 import * as React from "react"
 import { Link, useParams } from "react-router"
+import { CalendarXIcon } from "lucide-react"
 import { format, parseISO } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { ArrowLeftIcon } from "lucide-react"
 import { toast } from "sonner"
 
-import { Card, CardContent } from "@/components/ui/card"
-import { Separator } from "@/components/ui/separator"
+import { EmptyState, Page, PageHeader, Stamp } from "@/components/page"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DayFrequency } from "@/features/ebd/day-frequency"
 import { DayMetrics, type DayMetricsValues } from "@/features/ebd/day-metrics"
-import { DaySummary } from "@/features/ebd/day-summary"
+import { CloseDayButton, DaySummary } from "@/features/ebd/day-summary"
 import { LessonContent } from "@/features/ebd/lesson-content"
+import { numerarFolhas } from "@/features/ebd/folha"
 import {
   contarTotais,
   statusFinal,
@@ -20,6 +22,7 @@ import {
 } from "@/features/ebd/constants"
 import {
   useAula,
+  useAulas,
   useCloseDay,
   useFrequencias,
   useMatriculas,
@@ -43,33 +46,27 @@ export default function EbdDiaPage() {
   const { data: frequencias } = useFrequencias(id)
 
   if (isLoading) {
-    return (
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 p-4 sm:p-6">
-        <Skeleton className="h-16 w-full" />
-        <Skeleton className="h-64 w-full" />
-      </div>
-    )
+    return <DaySkeleton />
   }
 
   if (isError || !aula) {
     return (
-      <div className="mx-auto w-full max-w-2xl p-4 sm:p-6">
-        <Card>
-          <CardContent className="py-10 text-center text-sm text-destructive">
-            Dia não encontrado.
-          </CardContent>
-        </Card>
-      </div>
+      <Page width="narrow">
+        <EmptyState
+          icon={CalendarXIcon}
+          title="Dia não encontrado"
+          description="Ele pode ter sido apagado, ou o link está incompleto."
+          action={
+            <Button render={<Link to="/ebd/dias" />}>Ver os dias de aula</Button>
+          }
+        />
+      </Page>
     )
   }
 
   // Espera matrículas e frequências para inicializar o editor de uma vez só.
   if (matriculas === undefined || frequencias === undefined) {
-    return (
-      <div className="mx-auto flex w-full max-w-2xl flex-col gap-4 p-4 sm:p-6">
-        <Skeleton className="h-64 w-full" />
-      </div>
-    )
+    return <DaySkeleton />
   }
 
   return (
@@ -97,6 +94,7 @@ function DayEditor({
   const closeDay = useCloseDay()
   const reopenDay = useReopenDay()
   const buscarLicao = useBuscarLicao()
+  const { data: aulasDoTrimestre } = useAulas(aula.turma_trimestre_id)
 
   const dataAulaISO = aula.data
   const readOnly = aula.status === "fechada"
@@ -214,76 +212,91 @@ function DayEditor({
   const bibliasSummary = readOnly ? aula.total_biblias : metrics.total_biblias
   const revistasSummary = readOnly ? aula.total_revistas : metrics.total_revistas
 
+  const semana = format(parseISO(aula.data), "EEEE", { locale: ptBR }).replace("-feira", "")
+  const titulo = `${semana.charAt(0).toUpperCase()}${semana.slice(1)}, ${format(parseISO(aula.data), "d 'de' MMMM", { locale: ptBR })}`
+  const folha = numerarFolhas(aulasDoTrimestre ?? []).get(aula.id)
+  const ano = format(parseISO(aula.data), "yyyy")
+  const folio = [
+    folha && `Folha nº ${folha}`,
+    contexto ? trimestreLabel(contexto.numero, contexto.ano) : ano,
+    metrics.numero_licao && `Lição ${metrics.numero_licao}`,
+  ]
+    .filter(Boolean)
+    .join(" · ")
+
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 sm:p-6">
-      {/* Cabeçalho */}
-      <div className="flex flex-col gap-2">
-        <Link
-          to="/ebd/dias"
-          className="inline-flex w-fit items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeftIcon className="size-3.5" />
-          Voltar aos dias
-        </Link>
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="font-heading text-lg font-medium capitalize">
-            {format(parseISO(aula.data), "EEEE, dd 'de' MMMM 'de' yyyy", {
-              locale: ptBR,
-            })}
-          </h1>
-          <StatusBadge fechada={readOnly} />
+    <>
+      <Page width="narrow">
+        <PageHeader
+          back={{ to: "/ebd/dias", label: "Dias de aula" }}
+          title={titulo}
+          folio={folio}
+          status={
+            readOnly ? (
+              <Stamp detail={ano} animate={closeDay.isSuccess} className="ml-1" />
+            ) : (
+              <Badge variant="warning" className="max-sm:hidden">Aberto</Badge>
+            )
+          }
+        />
+
+        <DayFrequency
+          matriculas={ativas}
+          dataAulaISO={dataAulaISO}
+          statuses={statuses}
+          onChange={handleStatus}
+          onAllPresent={handleAllPresent}
+          readOnly={readOnly}
+        />
+
+        <DayMetrics
+          values={metrics}
+          onLocal={(patch) => setMetrics((prev) => ({ ...prev, ...patch }))}
+          onCommit={commitMetric}
+          readOnly={readOnly}
+          onBuscarLicao={handleBuscarLicao}
+          buscandoLicao={buscarLicao.isPending}
+        />
+
+        {conteudoLicao && <LessonContent markdown={conteudoLicao} />}
+
+        <DaySummary
+          totals={totals}
+          visitantes={visitantesSummary}
+          biblias={bibliasSummary}
+          revistas={revistasSummary}
+          ofertaCentavos={ofertaSummary}
+          status={aula.status}
+          onReopen={() => reopenDay.mutate(aula.id)}
+          reopening={reopenDay.isPending}
+        />
+      </Page>
+
+      {!readOnly && (
+        <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 border-t border-border bg-page/95 backdrop-blur-sm lg:bottom-0">
+          <div className="mx-auto flex max-w-3xl items-center justify-between gap-3 px-4 py-2.5 sm:px-8">
+            <p className="num flex flex-col text-base leading-snug sm:flex-row sm:gap-2" aria-live="polite">
+              <span>
+                <strong className="text-success">{totals.presentes} presentes</strong>
+                <span className="text-muted-foreground"> · </span>
+                <strong className={totals.faltas > 0 ? "text-destructive" : undefined}>
+                  {totals.faltas} {totals.faltas === 1 ? "falta" : "faltas"}
+                </strong>
+              </span>
+              {totals.naoMarcados > 0 && (
+                <strong className="text-warning">{totals.naoMarcados} sem marcar</strong>
+              )}
+            </p>
+            <CloseDayButton
+              naoMarcados={totals.naoMarcados}
+              onClose={handleClose}
+              closing={closeDay.isPending}
+              className="w-auto shrink-0"
+            />
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground">
-          {contexto
-            ? trimestreLabel(contexto.numero, contexto.ano)
-            : "Trimestre"}
-          {metrics.numero_licao && ` · Lição ${metrics.numero_licao}`}
-          {metrics.professor && ` · Prof. ${metrics.professor}`}
-        </p>
-      </div>
-
-      <DaySummary
-        totals={totals}
-        visitantes={visitantesSummary}
-        biblias={bibliasSummary}
-        revistas={revistasSummary}
-        ofertaCentavos={ofertaSummary}
-        status={aula.status}
-        onClose={handleClose}
-        onReopen={() => reopenDay.mutate(aula.id)}
-        closing={closeDay.isPending}
-        reopening={reopenDay.isPending}
-      />
-
-      <Separator />
-
-      <DayFrequency
-        matriculas={ativas}
-        dataAulaISO={dataAulaISO}
-        statuses={statuses}
-        onChange={handleStatus}
-        onAllPresent={handleAllPresent}
-        readOnly={readOnly}
-      />
-
-      <Separator />
-
-      <DayMetrics
-        values={metrics}
-        onLocal={(patch) => setMetrics((prev) => ({ ...prev, ...patch }))}
-        onCommit={commitMetric}
-        readOnly={readOnly}
-        onBuscarLicao={handleBuscarLicao}
-        buscandoLicao={buscarLicao.isPending}
-      />
-
-      {conteudoLicao && (
-        <>
-          <Separator />
-          <LessonContent markdown={conteudoLicao} />
-        </>
       )}
-    </div>
+    </>
   )
 }
 
@@ -314,17 +327,19 @@ function computeLive(
   }
 }
 
-function StatusBadge({ fechada }: { fechada: boolean }) {
-  if (fechada) {
-    return (
-      <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-        Fechado
-      </span>
-    )
-  }
+function DaySkeleton() {
   return (
-    <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
-      Aberto
-    </span>
+    <Page width="narrow">
+      <div className="flex flex-col gap-3 border-b-2 border-rule pb-5">
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-10 w-72 max-w-full" />
+        <Skeleton className="h-5 w-56" />
+      </div>
+      <div className="flex flex-col gap-3">
+        {Array.from({ length: 5 }).map((_, i) => (
+          <Skeleton key={i} className="h-16 w-full" />
+        ))}
+      </div>
+    </Page>
   )
 }

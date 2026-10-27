@@ -13,9 +13,9 @@ export const FREQUENCIA_STATUSES: EbdFrequenciaStatus[] = [
   "nao_aplicavel",
 ]
 
-/** Rótulo curto para o botão segmentado (mobile). */
+/** Rótulo curto para o botão segmentado. */
 export const FREQUENCIA_LABELS_CURTO: Record<EbdFrequenciaStatus, string> = {
-  presente: "Pres.",
+  presente: "Presente",
   falta: "Falta",
   nao_aplicavel: "N/A",
 }

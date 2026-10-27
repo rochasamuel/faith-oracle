@@ -1,15 +1,15 @@
 import * as React from "react"
 import { useNavigate } from "react-router"
-import { PlusIcon, SearchXIcon, UsersIcon } from "lucide-react"
+import { PlusIcon, SearchIcon, SearchXIcon, UsersIcon, XIcon } from "lucide-react"
 
-import { Button } from "@/components/ui/button"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+  EmptyState,
+  ErrorState,
+  Page,
+  PageHeader,
+  Section,
+} from "@/components/page"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   Select,
@@ -29,8 +29,8 @@ type StatusFilter = "todos" | "ativos" | "inativos"
 
 const STATUS_FILTER_LABELS: Record<StatusFilter, string> = {
   todos: "Todos",
-  ativos: "Ativos",
-  inativos: "Inativos",
+  ativos: "Só ativos",
+  inativos: "Só inativos",
 }
 
 /** Normaliza texto para busca (minúsculas, sem acentos). */
@@ -72,150 +72,143 @@ export default function MembrosPage() {
   const isEmpty = members.length === 0
   const filtersActive = search.trim() !== "" || status !== "todos"
 
+  function goToNew() {
+    navigate("/igreja/membros/novo")
+  }
+
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 sm:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="font-heading text-lg font-medium">Membros</h1>
-          <p className="text-xs text-muted-foreground">
-            Cadastro de membros da igreja. A contagem oficial considera apenas
-            os ativos.
-          </p>
-        </div>
-        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
-          <CargoManagerDialog />
-          <ImportMembersDialog />
-          <Button
-            className="w-full sm:w-auto"
-            onClick={() => navigate("/igreja/membros/novo")}
-          >
-            <PlusIcon />
-            Novo membro
-          </Button>
-        </div>
-      </div>
-
-      {/* Resumo */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <SummaryCard label="Membros ativos" value={ativos} highlight />
-        <SummaryCard label="Inativos" value={members.length - ativos} />
-        <SummaryCard label="Total cadastrado" value={members.length} />
-      </div>
-
-      {/* Filtros */}
-      {!isEmpty && (
-        <div className="flex flex-wrap items-center gap-2">
-          <Input
-            className="h-9 max-w-xs text-sm"
-            placeholder="Buscar por nome..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-          <Select
-            items={STATUS_FILTER_LABELS}
-            value={status}
-            onValueChange={(value) => setStatus(value as StatusFilter)}
-          >
-            <SelectTrigger className="h-9 w-32">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {(Object.keys(STATUS_FILTER_LABELS) as StatusFilter[]).map(
-                (option) => (
-                  <SelectItem key={option} value={option}>
-                    {STATUS_FILTER_LABELS[option]}
-                  </SelectItem>
-                )
-              )}
-            </SelectContent>
-          </Select>
-        </div>
-      )}
-
-      {/* Conteúdo */}
-      {isLoading ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-10 w-full" />
-          ))}
-        </div>
-      ) : isError ? (
-        <Card>
-          <CardContent className="py-8 text-center text-sm text-destructive">
-            Erro ao carregar membros
-            {error instanceof Error ? `: ${error.message}` : "."}
-          </CardContent>
-        </Card>
-      ) : isEmpty ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <UsersIcon className="size-8 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">Nenhum membro ainda</p>
-              <p className="text-xs text-muted-foreground">
-                Comece cadastrando o primeiro membro da igreja.
-              </p>
-            </div>
-            <Button size="sm" onClick={() => navigate("/igreja/membros/novo")}>
+    <Page>
+      <PageHeader
+        title="Membros"
+        description="Cadastro de membros da igreja. A contagem oficial considera apenas os ativos."
+        actions={
+          <>
+            <Button className="max-sm:basis-full" onClick={goToNew}>
               <PlusIcon />
               Novo membro
             </Button>
-          </CardContent>
-        </Card>
-      ) : visible.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <SearchXIcon className="size-8 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">Nenhum resultado</p>
-              <p className="text-xs text-muted-foreground">
-                Nenhum membro corresponde aos filtros aplicados.
-              </p>
-            </div>
-            {filtersActive && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setSearch("")
-                  setStatus("todos")
-                }}
-              >
-                Limpar filtros
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+            <ImportMembersDialog />
+            <CargoManagerDialog />
+          </>
+        }
+      />
+
+      {isLoading ? (
+        <div className="flex flex-col gap-4">
+          <Skeleton className="h-24 w-full" />
+          <div className="flex flex-col">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3.5 border-b border-rule py-3">
+                <Skeleton className="size-12 rounded-full" />
+                <div className="flex flex-1 flex-col gap-2">
+                  <Skeleton className="h-5 w-48 max-w-full" />
+                  <Skeleton className="h-4 w-32" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : isError ? (
+        <ErrorState title="Não foi possível carregar os membros." error={error} />
+      ) : isEmpty ? (
+        <EmptyState
+          icon={UsersIcon}
+          title="Nenhum membro cadastrado"
+          description="Comece cadastrando o primeiro membro, ou importe uma lista que você já tenha."
+          action={
+            <Button onClick={goToNew}>
+              <PlusIcon />
+              Cadastrar o primeiro membro
+            </Button>
+          }
+        />
       ) : (
-        <MembersTable members={visible} />
+        <>
+
+          <Section
+            title="Lista de membros"
+            count={
+              filtersActive
+                ? `${visible.length} de ${members.length}`
+                : `${ativos} ${ativos === 1 ? "ativo" : "ativos"}${members.length - ativos > 0 ? ` · ${members.length - ativos} ${members.length - ativos === 1 ? "inativo" : "inativos"}` : ""}`
+            }
+          >
+            <div className="grid gap-3 sm:grid-cols-[1fr_12rem]">
+              <div className="relative">
+                <SearchIcon
+                  aria-hidden
+                  className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                  type="search"
+                  aria-label="Buscar membro pelo nome"
+                  className="pr-12 pl-11"
+                  placeholder="Buscar pelo nome"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                />
+                {search && (
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className="absolute top-1 right-1"
+                    aria-label="Limpar busca"
+                    onClick={() => setSearch("")}
+                  >
+                    <XIcon />
+                  </Button>
+                )}
+              </div>
+              <Select
+                items={STATUS_FILTER_LABELS}
+                value={status}
+                onValueChange={(value) => setStatus(value as StatusFilter)}
+              >
+                <SelectTrigger className="w-full data-[size=default]:h-12" aria-label="Mostrar membros">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent alignItemWithTrigger={false}>
+                  {(Object.keys(STATUS_FILTER_LABELS) as StatusFilter[]).map(
+                    (option) => (
+                      <SelectItem key={option} value={option}>
+                        {STATUS_FILTER_LABELS[option]}
+                      </SelectItem>
+                    )
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {visible.length === 0 ? (
+              <EmptyState
+                icon={SearchXIcon}
+                title="Nenhum membro encontrado"
+                description={
+                  search.trim()
+                    ? `Nenhum membro com “${search.trim()}” no nome. Confira a grafia ou limpe a busca.`
+                    : "Nenhum membro nesta situação."
+                }
+                action={
+                  filtersActive ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSearch("")
+                        setStatus("todos")
+                      }}
+                    >
+                      Mostrar todos os membros
+                    </Button>
+                  ) : undefined
+                }
+              />
+            ) : (
+              <MembersTable members={visible} />
+            )}
+          </Section>
+        </>
       )}
-    </div>
+    </Page>
   )
 }
 
-function SummaryCard({
-  label,
-  value,
-  highlight,
-}: {
-  label: string
-  value: number
-  highlight?: boolean
-}) {
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardDescription>{label}</CardDescription>
-        <CardTitle
-          className={
-            highlight
-              ? "text-xl tabular-nums text-emerald-600 dark:text-emerald-400"
-              : "text-xl tabular-nums"
-          }
-        >
-          {value}
-        </CardTitle>
-      </CardHeader>
-    </Card>
-  )
-}

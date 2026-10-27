@@ -1,11 +1,16 @@
-import {
-  BookOpenIcon,
-  CalendarRangeIcon,
-  Trash2Icon,
-} from "lucide-react"
+import { format, parseISO } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import { CalendarRangeIcon, Trash2Icon } from "lucide-react"
 
+import {
+  EmptyState,
+  ErrorState,
+  Page,
+  PageHeader,
+  Section,
+} from "@/components/page"
+import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import {
   Dialog,
   DialogClose,
@@ -17,140 +22,176 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Skeleton } from "@/components/ui/skeleton"
-import { dateISOToBR } from "@/lib/date"
+import { dateToISO } from "@/lib/date"
 import { trimestreLabel } from "@/features/ebd/constants"
 import { TrimestreDialog } from "@/features/ebd/trimestre-dialog"
 import { useDeleteTrimestre, useTurmaTrimestres, useTurmas } from "@/features/ebd/hooks"
 import type { EbdTurmaTrimestre } from "@/api/ebd"
 
+/** "5 de out. a 28 de dez. de 2026" (ano só no fim quando é o mesmo). */
+function periodo(inicioISO: string, fimISO: string): string {
+  const inicio = parseISO(inicioISO)
+  const fim = parseISO(fimISO)
+  const mesmoAno = format(inicio, "yyyy") === format(fim, "yyyy")
+  const fmtInicio = mesmoAno ? "d 'de' MMM" : "d 'de' MMM 'de' yyyy"
+  return `${format(inicio, fmtInicio, { locale: ptBR })} a ${format(
+    fim,
+    "d 'de' MMM 'de' yyyy",
+    { locale: ptBR }
+  )}`
+}
+
 export default function EbdTrimestrePage() {
-  const { data: turmas } = useTurmas()
+  const { data: turmas, isError: turmasError, error: turmasErr } = useTurmas()
   const turma = turmas?.[0]
   const { data, isLoading, isError, error } = useTurmaTrimestres(turma?.id)
   const trimestres = data ?? []
+  const todayISO = dateToISO(new Date())
+
+  const carregando = turmas === undefined || (turma !== undefined && isLoading)
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 sm:p-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="font-heading text-lg font-medium">Trimestre / Turma</h1>
-          <p className="text-xs text-muted-foreground">
-            {turma?.nome ?? "Turma"} — período e revista de cada trimestre.
-          </p>
-        </div>
-        <TrimestreDialog turmaId={turma?.id} />
-      </div>
+    <Page width="narrow">
+      <PageHeader
+        title="Trimestre e turma"
+        folio={turma?.nome}
+        description="O período e a revista de cada trimestre. Os dias de aula e as matrículas ficam dentro do trimestre."
+        actions={<TrimestreDialog turmaId={turma?.id} />}
+      />
 
-      {isLoading ? (
-        <div className="flex flex-col gap-3">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} className="h-24 w-full" />
-          ))}
-        </div>
-      ) : isError ? (
-        <Card>
-          <CardContent className="py-8 text-center text-sm text-destructive">
-            Erro ao carregar trimestres
-            {error instanceof Error ? `: ${error.message}` : "."}
-          </CardContent>
-        </Card>
-      ) : trimestres.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <CalendarRangeIcon className="size-8 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">Nenhum trimestre ainda</p>
-              <p className="text-xs text-muted-foreground">
-                Crie o primeiro trimestre para começar a matricular alunos.
-              </p>
-            </div>
-            <TrimestreDialog turmaId={turma?.id} />
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {trimestres.map((tt) => (
-            <TrimestreCard key={tt.id} tt={tt} turmaId={turma?.id} />
-          ))}
-        </div>
-      )}
-    </div>
+      <Section
+        title="Trimestres"
+        count={
+          carregando || isError || turmasError
+            ? undefined
+            : trimestres.length
+        }
+      >
+        {carregando ? (
+          <div className="flex flex-col">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="flex flex-col gap-2 border-b border-rule py-4">
+                <Skeleton className="h-7 w-56 max-w-full" />
+                <Skeleton className="h-5 w-72 max-w-full" />
+              </div>
+            ))}
+          </div>
+        ) : turmasError || isError ? (
+          <ErrorState
+            title="Não foi possível carregar os trimestres."
+            error={turmasErr ?? error}
+          />
+        ) : trimestres.length === 0 ? (
+          <EmptyState
+            icon={CalendarRangeIcon}
+            title="Nenhum trimestre ainda"
+            description="Crie o primeiro trimestre com as datas e a revista. Depois você matricula os alunos e abre os dias de aula."
+            action={<TrimestreDialog turmaId={turma?.id} />}
+          />
+        ) : (
+          <ol className="flex flex-col">
+            {trimestres.map((tt) => (
+              <TrimestreRow
+                key={tt.id}
+                tt={tt}
+                turmaId={turma?.id}
+                vigente={
+                  !!tt.trimestre &&
+                  tt.trimestre.data_inicio <= todayISO &&
+                  todayISO <= tt.trimestre.data_fim
+                }
+              />
+            ))}
+          </ol>
+        )}
+      </Section>
+    </Page>
   )
 }
 
-function TrimestreCard({
+function TrimestreRow({
   tt,
   turmaId,
+  vigente,
 }: {
   tt: EbdTurmaTrimestre
   turmaId: string | undefined
+  vigente: boolean
 }) {
   const deleteTrimestre = useDeleteTrimestre(turmaId)
+  const label = tt.trimestre
+    ? trimestreLabel(tt.trimestre.numero, tt.trimestre.ano)
+    : "Trimestre"
 
   return (
-    <Card>
-      <CardContent className="flex flex-col gap-3 p-4">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <p className="font-heading text-base font-medium">
-              {tt.trimestre
-                ? trimestreLabel(tt.trimestre.numero, tt.trimestre.ano)
-                : "Trimestre"}
-            </p>
-            {tt.trimestre && (
-              <p className="text-xs text-muted-foreground">
-                {dateISOToBR(tt.trimestre.data_inicio)} a{" "}
-                {dateISOToBR(tt.trimestre.data_fim)}
-              </p>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <TrimestreDialog turmaId={turmaId} editing={tt} />
-            <Dialog>
-              <DialogTrigger
-                render={
-                  <Button variant="outline" size="sm">
-                    <Trash2Icon />
-                  </Button>
-                }
-              />
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Remover trimestre?</DialogTitle>
-                  <DialogDescription>
-                    Isso apaga o trimestre e tudo ligado a ele (matrículas, dias
-                    e frequências). Esta ação não pode ser desfeita.
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <DialogClose
-                    render={<Button variant="outline">Cancelar</Button>}
-                  />
-                  <Button
-                    variant="destructive"
-                    onClick={() =>
-                      tt.trimestre && deleteTrimestre.mutate(tt.trimestre.id)
-                    }
-                    disabled={deleteTrimestre.isPending}
-                  >
-                    Remover
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+    <li className="flex flex-col gap-3 border-b border-rule py-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+      <div className="flex min-w-0 flex-col gap-1">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <p className="num font-heading text-xl leading-snug font-semibold">
+            {label}
+          </p>
+          {vigente && <Badge variant="success">Em andamento</Badge>}
         </div>
+        {tt.trimestre && (
+          <p className="num font-type text-base text-muted-foreground">
+            {periodo(tt.trimestre.data_inicio, tt.trimestre.data_fim)}
+          </p>
+        )}
+        <p className="num font-type text-base text-muted-foreground">
+          {tt.revista_titulo ? (
+            <>
+              Revista: <span className="text-foreground">{tt.revista_titulo}</span>
+            </>
+          ) : (
+            "Sem revista cadastrada"
+          )}
+          {" · "}
+          {tt.revistas_compradas}{" "}
+          {tt.revistas_compradas === 1 ? "revista comprada" : "revistas compradas"}
+        </p>
+      </div>
 
-        <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
-          <span className="flex items-center gap-1.5 text-muted-foreground">
-            <BookOpenIcon className="size-4" />
-            {tt.revista_titulo || "Sem revista"}
-          </span>
-          <span className="text-muted-foreground">
-            Revistas compradas: <span className="tabular-nums">{tt.revistas_compradas}</span>
-          </span>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="flex shrink-0 gap-2.5 [&>*]:max-sm:flex-1">
+        <TrimestreDialog turmaId={turmaId} editing={tt} />
+        <Dialog>
+          <DialogTrigger
+            render={
+              <Button
+                variant="outline"
+                className="hover:border-destructive/40 hover:text-destructive"
+              >
+                <Trash2Icon />
+                Remover
+                <span className="sr-only"> {label}</span>
+              </Button>
+            }
+          />
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>Remover o {label}?</DialogTitle>
+              <DialogDescription>
+                Isso apaga o trimestre e tudo ligado a ele: matrículas, dias de
+                aula e frequências. Esta ação não pode ser desfeita.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose render={<Button variant="outline">Voltar</Button>} />
+              <Button
+                variant="destructive"
+                onClick={() =>
+                  tt.trimestre && deleteTrimestre.mutate(tt.trimestre.id)
+                }
+                disabled={deleteTrimestre.isPending}
+              >
+                <Trash2Icon />
+                {deleteTrimestre.isPending
+                  ? "Removendo..."
+                  : "Sim, remover tudo"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    </li>
   )
 }

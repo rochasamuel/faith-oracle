@@ -8,6 +8,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -141,7 +142,7 @@ export function TrimestreDialog({ turmaId, editing }: TrimestreDialogProps) {
       <DialogTrigger
         render={
           isEditing ? (
-            <Button variant="outline" size="sm">
+            <Button variant="outline">
               <PencilIcon />
               Editar
             </Button>
@@ -170,23 +171,28 @@ export function TrimestreDialog({ turmaId, editing }: TrimestreDialogProps) {
               <Input
                 id="ano"
                 inputMode="numeric"
-                className="h-9 text-sm"
+                className="num"
                 value={ano}
                 onChange={(e) => setAno(Number(e.target.value.replace(/\D/g, "")) || 0)}
                 aria-invalid={!!errors.ano}
               />
               {errors.ano && (
-                <p className="text-xs text-destructive">{errors.ano}</p>
+                <p className="text-sm font-semibold text-destructive">
+                  {errors.ano} Use os quatro dígitos, por exemplo {currentYear}.
+                </p>
               )}
             </div>
             <div className="flex flex-col gap-2">
-              <Label>Trimestre</Label>
+              <Label htmlFor="trimestre-numero">Trimestre</Label>
               <Select
                 items={NUMERO_LABELS}
                 value={String(numero)}
                 onValueChange={(v) => setNumero(Number(v))}
               >
-                <SelectTrigger className="h-9 w-full">
+                <SelectTrigger
+                  id="trimestre-numero"
+                  className="w-full data-[size=default]:h-12"
+                >
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -200,25 +206,38 @@ export function TrimestreDialog({ turmaId, editing }: TrimestreDialogProps) {
             </div>
           </div>
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label>Início</Label>
-              <DateField value={inicio} onChange={setInicio} invalid={!!errors.datas} />
+          <div className="flex flex-col gap-2">
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="trimestre-inicio">Data de início</Label>
+                <DateField
+                  id="trimestre-inicio"
+                  value={inicio}
+                  onChange={setInicio}
+                  invalid={!!errors.datas}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="trimestre-fim">Data de fim</Label>
+                <DateField
+                  id="trimestre-fim"
+                  value={fim}
+                  onChange={setFim}
+                  invalid={!!errors.datas}
+                />
+              </div>
             </div>
-            <div className="flex flex-col gap-2">
-              <Label>Fim</Label>
-              <DateField value={fim} onChange={setFim} invalid={!!errors.datas} />
-            </div>
+            {errors.datas && (
+              <p className="text-sm font-semibold text-destructive">
+                {errors.datas}
+              </p>
+            )}
           </div>
-          {errors.datas && (
-            <p className="-mt-3 text-xs text-destructive">{errors.datas}</p>
-          )}
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="revista">Revista (opcional)</Label>
             <Input
               id="revista"
-              className="h-9 text-sm"
               placeholder="Título da revista do trimestre"
               value={revista}
               onChange={(e) => setRevista(e.target.value)}
@@ -230,7 +249,7 @@ export function TrimestreDialog({ turmaId, editing }: TrimestreDialogProps) {
             <Input
               id="revistas-compradas"
               inputMode="numeric"
-              className="h-9 w-32 text-sm"
+              className="num w-32"
               value={revistasCompradas}
               onChange={(e) =>
                 setRevistasCompradas(Number(e.target.value.replace(/\D/g, "")) || 0)
@@ -238,20 +257,24 @@ export function TrimestreDialog({ turmaId, editing }: TrimestreDialogProps) {
               aria-invalid={!!errors.revistas_compradas}
             />
             {errors.revistas_compradas && (
-              <p className="text-xs text-destructive">
+              <p className="text-sm font-semibold text-destructive">
                 {errors.revistas_compradas}
               </p>
             )}
           </div>
 
-          <div className="flex justify-end gap-2">
+          <DialogFooter>
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancelar
             </Button>
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Salvando..." : isEditing ? "Salvar" : "Criar trimestre"}
+              {isPending
+                ? "Salvando..."
+                : isEditing
+                  ? "Salvar alterações"
+                  : "Criar trimestre"}
             </Button>
-          </div>
+          </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>

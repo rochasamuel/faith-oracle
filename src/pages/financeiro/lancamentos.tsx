@@ -2,19 +2,19 @@ import * as React from "react"
 import { endOfDay, isWithinInterval, parseISO, startOfDay } from "date-fns"
 import { SearchXIcon, WalletIcon } from "lucide-react"
 
+import {
+  EmptyState,
+  ErrorState,
+  Ledger,
+  Page,
+  PageHeader,
+  Section,
+} from "@/components/page"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { formatBRL } from "@/lib/currency"
 import { NewTransactionDialog } from "@/features/financeiro/new-transaction-dialog"
 import { ImportCsvDialog } from "@/features/financeiro/import-csv-dialog"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Skeleton } from "@/components/ui/skeleton"
-import { cn } from "@/lib/utils"
-import { formatBRL } from "@/lib/currency"
 import { useTransactions } from "@/features/financeiro/hooks"
 import { TransactionTable } from "@/features/financeiro/transaction-table"
 import { TransactionFilters } from "@/features/financeiro/transaction-filters"
@@ -92,125 +92,115 @@ export default function LancamentosPage() {
 
   const isEmpty = !data || data.length === 0
   const filtersActive = hasActiveFilters(filters)
+  const total = data?.length ?? 0
 
   return (
-    <div className="mx-auto flex w-full max-w-5xl flex-col gap-6 p-4 sm:p-6">
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h1 className="font-heading text-lg font-medium">Lançamentos</h1>
-          <p className="text-xs text-muted-foreground">
-            Entradas e saídas financeiras registradas.
-          </p>
-        </div>
-        <div className="flex flex-wrap justify-end gap-2">
-          <ImportCsvDialog />
-          <NewTransactionDialog />
-        </div>
-      </div>
+    <Page width="wide">
+      <PageHeader
+        title="Lançamentos"
+        folio={
+          data
+            ? `${total} ${total === 1 ? "lançamento registrado" : "lançamentos registrados"}`
+            : undefined
+        }
+        description="O livro-caixa da igreja: cada entrada e saída, com data, categoria e valor."
+        actions={
+          <>
+            <ImportCsvDialog />
+            <NewTransactionDialog />
+          </>
+        }
+      />
 
-      {/* Resumo */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <SummaryCard
-          label="Entradas"
-          value={totals.entradas}
-          className="text-emerald-600 dark:text-emerald-400"
-        />
-        <SummaryCard
-          label="Saídas"
-          value={totals.saidas}
-          className="text-rose-600 dark:text-rose-400"
-        />
-        <SummaryCard
-          label="Saldo"
-          value={totals.saldo}
-          className={cn(
-            totals.saldo >= 0
-              ? "text-emerald-600 dark:text-emerald-400"
-              : "text-rose-600 dark:text-rose-400"
-          )}
-        />
-      </div>
-
-      {!isEmpty && (
-        <TransactionFilters value={filters} onChange={setFilters} />
-      )}
-
-      {/* Conteúdo */}
       {isLoading ? (
-        <div className="flex flex-col gap-2">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-10 w-full" />
-          ))}
-        </div>
+        <LedgerSkeleton />
       ) : isError ? (
-        <Card>
-          <CardContent className="py-8 text-center text-sm text-destructive">
-            Erro ao carregar lançamentos
-            {error instanceof Error ? `: ${error.message}` : "."}
-          </CardContent>
-        </Card>
+        <ErrorState title="Não foi possível carregar os lançamentos." error={error} />
       ) : isEmpty ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <WalletIcon className="size-8 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">Nenhum lançamento ainda</p>
-              <p className="text-xs text-muted-foreground">
-                Comece registrando a primeira entrada ou saída.
-              </p>
-            </div>
-            <NewTransactionDialog size="sm" />
-          </CardContent>
-        </Card>
-      ) : visible.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <SearchXIcon className="size-8 text-muted-foreground" />
-            <div>
-              <p className="text-sm font-medium">Nenhum resultado</p>
-              <p className="text-xs text-muted-foreground">
-                Nenhum lançamento corresponde aos filtros aplicados.
-              </p>
-            </div>
-            {filtersActive && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setFilters(EMPTY_FILTERS)}
-              >
-                Limpar filtros
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <TransactionTable
-          transactions={visible}
-          sort={sort}
-          onToggleSort={handleToggleSort}
+        <EmptyState
+          icon={WalletIcon}
+          title="Nenhum lançamento ainda"
+          description="Registre a primeira entrada ou saída. Se já tem tudo numa planilha, use “Importar CSV”."
+          action={<NewTransactionDialog />}
         />
+      ) : (
+        <>
+          {/* Resumo: Entradas · Saídas · Saldo, sobre o que está filtrado */}
+          <section aria-label="Resumo dos lançamentos" className="flex flex-col gap-2">
+            <Ledger
+              className="max-w-xl"
+              rows={[
+                { label: "Entradas", value: `+ ${formatBRL(totals.entradas)}`, tone: "positive" },
+                { label: "Saídas", value: `− ${formatBRL(totals.saidas)}`, tone: "negative" },
+              ]}
+              total={{
+                label: "Saldo",
+                value: `${totals.saldo < 0 ? "− " : ""}${formatBRL(Math.abs(totals.saldo))}`,
+                tone: totals.saldo < 0 ? "negative" : "default",
+                hint: totals.saldo < 0 ? "Saiu mais do que entrou" : "Entradas menos saídas",
+              }}
+            />
+            <p className="text-sm text-muted-foreground">
+              {filtersActive
+                ? "Totais dos lançamentos que aparecem com os filtros abaixo."
+                : "Totais de todos os lançamentos registrados."}
+            </p>
+          </section>
+
+          <Section
+            title="Registros"
+            count={
+              filtersActive ? `${visible.length} de ${total}` : `${total}`
+            }
+          >
+            <TransactionFilters value={filters} onChange={setFilters} />
+
+            {visible.length === 0 ? (
+              <EmptyState
+                icon={SearchXIcon}
+                title="Nenhum lançamento com esses filtros"
+                description="Mude o período, a categoria ou os valores, ou limpe os filtros para ver tudo."
+                action={
+                  filtersActive ? (
+                    <Button variant="outline" onClick={() => setFilters(EMPTY_FILTERS)}>
+                      Limpar filtros
+                    </Button>
+                  ) : undefined
+                }
+              />
+            ) : (
+              <TransactionTable
+                transactions={visible}
+                sort={sort}
+                onToggleSort={handleToggleSort}
+              />
+            )}
+          </Section>
+        </>
       )}
-    </div>
+    </Page>
   )
 }
 
-function SummaryCard({
-  label,
-  value,
-  className,
-}: {
-  label: string
-  value: number
-  className?: string
-}) {
+function LedgerSkeleton() {
   return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardDescription>{label}</CardDescription>
-        <CardTitle className={cn("text-xl tabular-nums", className)}>
-          {formatBRL(value)}
-        </CardTitle>
-      </CardHeader>
-    </Card>
+    <div className="flex flex-col gap-8">
+      <div className="flex max-w-xl flex-col">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="flex justify-between gap-2 border-b border-rule py-3.5">
+            <Skeleton className="h-4 w-20" />
+            <Skeleton className="h-8 w-36" />
+          </div>
+        ))}
+      </div>
+      <div className="flex flex-col">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="flex justify-between gap-4 border-b border-rule py-4">
+            <Skeleton className="h-6 w-48 max-w-[60%]" />
+            <Skeleton className="h-6 w-28" />
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }

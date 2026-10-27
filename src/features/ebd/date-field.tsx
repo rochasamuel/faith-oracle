@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils"
 import { formatDateBR } from "@/lib/date"
 
 interface DateFieldProps {
+  /** Liga o botão a um <Label htmlFor>. */
+  id?: string
   value: Date | undefined
   onChange: (date: Date | undefined) => void
   invalid?: boolean
@@ -25,6 +27,7 @@ interface DateFieldProps {
 
 /** Botão + popover de calendário (date-fns/pt-BR), reaproveitado nos formulários. */
 export function DateField({
+  id,
   value,
   onChange,
   invalid,
@@ -43,14 +46,15 @@ export function DateField({
       <PopoverTrigger
         render={
           <Button
+            id={id}
             variant="outline"
             aria-invalid={invalid}
             className={cn(
-              "h-9 w-full justify-start gap-2 font-normal",
+              "num w-full justify-start gap-2.5 px-3.5 text-[1.0625rem] font-normal",
               !value && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="size-4" />
+            <CalendarIcon className="size-5" aria-hidden />
             {value ? formatDateBR(value) : placeholder}
           </Button>
         }

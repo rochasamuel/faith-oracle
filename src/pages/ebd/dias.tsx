@@ -2,10 +2,19 @@ import * as React from "react"
 import { Link } from "react-router"
 import { format, parseISO } from "date-fns"
 import { ptBR } from "date-fns/locale"
-import { CalendarRangeIcon, Trash2Icon } from "lucide-react"
+import { CalendarRangeIcon, ChevronRightIcon, Trash2Icon } from "lucide-react"
 
+import {
+  EmptyState,
+  ErrorState,
+  Page,
+  PageHeader,
+  Section,
+  Stamp,
+} from "@/components/page"
+import { Badge } from "@/components/ui/badge"
+import { numerarFolhas } from "@/features/ebd/folha"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import {
   Dialog,
   DialogClose,
@@ -16,9 +25,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 import { Skeleton } from "@/components/ui/skeleton"
 import { formatBRL } from "@/lib/currency"
 import { dateToISO } from "@/lib/date"
+import { trimestreLabel } from "@/features/ebd/constants"
 import { OpenDayDialog } from "@/features/ebd/open-day-dialog"
 import { TrimestreSelect } from "@/features/ebd/trimestre-select"
 import {
@@ -41,148 +52,238 @@ function pickDefault(tts: EbdTurmaTrimestre[], todayISO: string): string | null 
 }
 
 export default function EbdDiasPage() {
-  const { data: turmas } = useTurmas()
+  const { data: turmas, isError: turmasError, error: turmasErr } = useTurmas()
   const turma = turmas?.[0]
-  const { data: ttData } = useTurmaTrimestres(turma?.id)
+  const {
+    data: ttData,
+    isError: ttError,
+    error: ttErr,
+  } = useTurmaTrimestres(turma?.id)
   const tts = ttData ?? []
+  const todayISO = dateToISO(new Date())
 
   // Seleção derivada: a escolha manual prevalece; senão, o trimestre vigente.
   const [override, setOverride] = React.useState<string | null>(null)
   const selectedId =
     override && tts.some((tt) => tt.id === override)
       ? override
-      : pickDefault(tts, dateToISO(new Date()))
+      : pickDefault(tts, todayISO)
+  const selectedTT = tts.find((tt) => tt.id === selectedId)
 
-  const { data: aulas, isLoading } = useAulas(selectedId ?? undefined)
+  const {
+    data: aulas,
+    isLoading,
+    isError,
+    error,
+  } = useAulas(selectedId ?? undefined)
   const lista = aulas ?? []
+  const folhas = numerarFolhas(lista)
 
-  if (tts.length === 0) {
+  const carregandoTrimestres =
+    turmas === undefined || (turma !== undefined && ttData === undefined)
+
+  if (turmasError || ttError) {
     return (
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 sm:p-6">
-        <h1 className="font-heading text-lg font-medium">Dias da EBD</h1>
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <CalendarRangeIcon className="size-8 text-muted-foreground" />
-            <p className="text-sm font-medium">Nenhum trimestre criado</p>
-            <p className="text-xs text-muted-foreground">
-              Crie um trimestre antes de abrir os dias de aula.
-            </p>
-            <Button render={<Link to="/ebd/trimestre" />}>Ir para Trimestre</Button>
-          </CardContent>
-        </Card>
-      </div>
+      <Page width="narrow">
+        <PageHeader title="Dias de aula" />
+        <ErrorState
+          title="Não foi possível carregar os trimestres."
+          error={turmasErr ?? ttErr}
+        />
+      </Page>
     )
   }
 
+  if (carregandoTrimestres) {
+    return (
+      <Page width="narrow">
+        <PageHeader title="Dias de aula" />
+        <RowsSkeleton />
+      </Page>
+    )
+  }
+
+  if (tts.length === 0) {
+    return (
+      <Page width="narrow">
+        <PageHeader title="Dias de aula" />
+        <EmptyState
+          icon={CalendarRangeIcon}
+          title="Nenhum trimestre criado"
+          description="Antes de abrir um dia de aula, cadastre o trimestre com as datas e a revista."
+          action={
+            <Button render={<Link to="/ebd/trimestre" />}>Criar trimestre</Button>
+          }
+        />
+      </Page>
+    )
+  }
+
+  const folio = [
+    selectedTT?.trimestre &&
+      trimestreLabel(selectedTT.trimestre.numero, selectedTT.trimestre.ano),
+    turma?.nome,
+  ]
+    .filter(Boolean)
+    .join(" · ")
+
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 sm:p-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="font-heading text-lg font-medium">Dias da EBD</h1>
-          <TrimestreSelect
-            items={tts}
-            value={selectedId}
-            onValueChange={setOverride}
-          />
-        </div>
-        <OpenDayDialog turmaTrimestres={tts} />
+    <Page width="narrow">
+      <PageHeader
+        title="Dias de aula"
+        folio={folio || undefined}
+        description="Abra o dia para fazer a chamada e lançar os números. Toque num dia para ver ou continuar."
+        actions={<OpenDayDialog turmaTrimestres={tts} />}
+      />
+
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
+        <Label htmlFor="dias-trimestre">Trimestre</Label>
+        <TrimestreSelect
+          id="dias-trimestre"
+          items={tts}
+          value={selectedId}
+          onValueChange={setOverride}
+        />
       </div>
 
-      {isLoading ? (
-        <div className="flex flex-col gap-3">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full" />
-          ))}
-        </div>
-      ) : lista.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
-            <CalendarRangeIcon className="size-8 text-muted-foreground" />
-            <p className="text-sm font-medium">Nenhum dia aberto ainda</p>
-            <p className="text-xs text-muted-foreground">
-              Abra um dia para registrar a frequência e as métricas.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {lista.map((aula) => (
-            <AulaCard key={aula.id} aula={aula} />
-          ))}
-        </div>
-      )}
-    </div>
+      <Section
+        title="Dias registrados"
+        count={
+          isLoading || isError
+            ? undefined
+            : `${lista.length} ${lista.length === 1 ? "dia" : "dias"}`
+        }
+      >
+        {isLoading ? (
+          <RowsSkeleton />
+        ) : isError ? (
+          <ErrorState title="Não foi possível carregar os dias." error={error} />
+        ) : lista.length === 0 ? (
+          <EmptyState
+            icon={CalendarRangeIcon}
+            title="Nenhum dia aberto neste trimestre"
+            description="Abra o dia de hoje para começar a chamada. Dá para abrir também um domingo que já passou."
+            action={<OpenDayDialog turmaTrimestres={tts} />}
+          />
+        ) : (
+          <ol className="flex flex-col">
+            {lista.map((aula) => (
+              <AulaRow
+                key={aula.id}
+                aula={aula}
+                folha={folhas.get(aula.id)}
+                hoje={aula.data === todayISO}
+              />
+            ))}
+          </ol>
+        )}
+      </Section>
+    </Page>
   )
 }
 
-function AulaCard({ aula }: { aula: EbdAula }) {
+function AulaRow({
+  aula,
+  folha,
+  hoje,
+}: {
+  aula: EbdAula
+  folha: number | undefined
+  hoje: boolean
+}) {
   const deleteAula = useDeleteAula()
   const fechada = aula.status === "fechada"
+  const dataLonga = format(parseISO(aula.data), "d 'de' MMMM", { locale: ptBR })
+
+  const detalhes = [
+    folha && `Folha nº ${folha}`,
+    hoje && "Hoje",
+    aula.numero_licao != null && `Lição ${aula.numero_licao}`,
+    fechada &&
+      `${aula.total_presentes} de ${aula.total_matriculados} presentes`,
+    fechada && `Assistência ${aula.total_assistencia}`,
+    `Oferta ${formatBRL(aula.oferta_centavos)}`,
+  ].filter(Boolean)
 
   return (
-    <Card className="relative">
-      <Link to={`/ebd/dias/${aula.id}`} className="block p-4 pr-12">
-        <div className="flex items-center justify-between gap-2">
-          <p className="font-heading text-sm font-medium capitalize">
-            {format(parseISO(aula.data), "EEEE, dd/MM/yyyy", { locale: ptBR })}
+    <li className="flex items-center gap-1 border-b border-rule">
+      <Link
+        to={`/ebd/dias/${aula.id}`}
+        className="group flex min-h-16 min-w-0 flex-1 items-center gap-3 rounded-md py-3 pr-1 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+      >
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <p className="font-heading text-xl leading-snug font-semibold first-letter:uppercase group-hover:underline">
+              {format(parseISO(aula.data), "EEEE, d MMM", { locale: ptBR })}
+            </p>
+            {fechada ? (
+              <Stamp className="origin-left scale-75" />
+            ) : (
+              <Badge variant="warning">Aberto</Badge>
+            )}
+          </div>
+          <p className="num font-type text-base text-muted-foreground">
+            {detalhes.join(" · ")}
           </p>
-          <span
-            className={
-              fechada
-                ? "rounded-full bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400"
-                : "rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400"
-            }
-          >
-            {fechada ? "Fechado" : "Aberto"}
-          </span>
         </div>
-        <div className="mt-1 flex flex-wrap gap-x-4 gap-y-0.5 text-xs text-muted-foreground">
-          {aula.numero_licao != null && <span>Lição {aula.numero_licao}</span>}
-          {fechada && (
-            <span>
-              Presentes {aula.total_presentes}/{aula.total_matriculados} ·
-              Assistência {aula.total_assistencia}
-            </span>
-          )}
-          <span>Oferta {formatBRL(aula.oferta_centavos)}</span>
-        </div>
+        <ChevronRightIcon
+          aria-hidden
+          className="size-5 shrink-0 text-muted-foreground"
+        />
       </Link>
 
-      <div className="absolute top-2 right-2">
-        <Dialog>
-          <DialogTrigger
-            render={
-              <Button variant="ghost" size="icon-sm">
-                <Trash2Icon />
-              </Button>
-            }
-          />
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Remover este dia?</DialogTitle>
-              <DialogDescription>
-                A frequência e as métricas deste dia serão apagadas. Esta ação
-                não pode ser desfeita.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <DialogClose render={<Button variant="outline">Cancelar</Button>} />
-              <Button
-                variant="destructive"
-                onClick={() =>
-                  deleteAula.mutate({
-                    id: aula.id,
-                    turma_trimestre_id: aula.turma_trimestre_id,
-                  })
-                }
-                disabled={deleteAula.isPending}
-              >
-                Remover
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </Card>
+      <Dialog>
+        <DialogTrigger
+          render={
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-destructive"
+              aria-label={`Remover o dia ${dataLonga}`}
+            >
+              <Trash2Icon />
+            </Button>
+          }
+        />
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Remover o dia {dataLonga}?</DialogTitle>
+            <DialogDescription>
+              A chamada e os números deste dia serão apagados. Esta ação não
+              pode ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline">Voltar</Button>} />
+            <Button
+              variant="destructive"
+              onClick={() =>
+                deleteAula.mutate({
+                  id: aula.id,
+                  turma_trimestre_id: aula.turma_trimestre_id,
+                })
+              }
+              disabled={deleteAula.isPending}
+            >
+              <Trash2Icon />
+              {deleteAula.isPending ? "Removendo..." : "Sim, remover o dia"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </li>
+  )
+}
+
+function RowsSkeleton() {
+  return (
+    <div className="flex flex-col">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="flex flex-col gap-2 border-b border-rule py-3.5">
+          <Skeleton className="h-6 w-48" />
+          <Skeleton className="h-5 w-64 max-w-full" />
+        </div>
+      ))}
+    </div>
   )
 }

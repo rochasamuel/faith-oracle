@@ -1,0 +1,648 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-27T03:19:49.478623+00:00",
+  "title": "Design System: Faith Oracle",
+  "extensions": {
+    "colorMeta": {
+      "cover": {
+        "role": "secondary",
+        "displayName": "Book-Cloth Navy",
+        "canonical": "oklch(0.29 0.105 272)",
+        "hex": "#1b235e",
+        "tonalRamp": [
+          "#050036",
+          "#171e58",
+          "#323f7d",
+          "#5161a2",
+          "#7385c9",
+          "#97aaf1",
+          "#b5caff",
+          "#d5ebff"
+        ]
+      },
+      "cover-foreground": {
+        "role": "secondary",
+        "displayName": "Cover Ink",
+        "canonical": "oklch(0.97 0.012 265)",
+        "hex": "#f1f5fe",
+        "tonalRamp": [
+          "#090b10",
+          "#24262c",
+          "#42454c",
+          "#63666d",
+          "#868991",
+          "#aaaeb6",
+          "#caced6",
+          "#eaeff7"
+        ]
+      },
+      "cover-muted": {
+        "role": "secondary",
+        "displayName": "Cover Thread",
+        "canonical": "oklch(0.8 0.045 268)",
+        "hex": "#b1bddc",
+        "tonalRamp": [
+          "#04091e",
+          "#1d253d",
+          "#3b445e",
+          "#5b6681",
+          "#7d89a5",
+          "#a2aecb",
+          "#c1cdec",
+          "#e1eeff"
+        ]
+      },
+      "cover-accent": {
+        "role": "secondary",
+        "displayName": "Cloth Fold",
+        "canonical": "oklch(0.37 0.12 270)",
+        "hex": "#28387e",
+        "tonalRamp": [
+          "#05003c",
+          "#121b60",
+          "#2d3e84",
+          "#4c60aa",
+          "#6d84d2",
+          "#90aafa",
+          "#afcaff",
+          "#cfebff"
+        ]
+      },
+      "primary": {
+        "role": "primary",
+        "displayName": "Ink Blue",
+        "canonical": "oklch(0.46 0.175 266)",
+        "hex": "#294cb8",
+        "tonalRamp": [
+          "#040045",
+          "#071869",
+          "#213d8f",
+          "#4060b5",
+          "#6185dd",
+          "#84aaff",
+          "#a3cbff",
+          "#c2ecff"
+        ]
+      },
+      "primary-foreground": {
+        "role": "primary",
+        "displayName": "On Ink",
+        "canonical": "oklch(0.985 0.005 265)",
+        "hex": "#f8fafe",
+        "tonalRamp": [
+          "#0a0b0d",
+          "#252629",
+          "#444548",
+          "#656669",
+          "#88898c",
+          "#acaeb1",
+          "#ccced1",
+          "#edeef2"
+        ]
+      },
+      "ring": {
+        "role": "primary",
+        "displayName": "Focus Blue",
+        "canonical": "oklch(0.55 0.17 266)",
+        "hex": "#4269d3",
+        "tonalRamp": [
+          "#040045",
+          "#071869",
+          "#213d8f",
+          "#4060b5",
+          "#6185dd",
+          "#84aaff",
+          "#a3cbff",
+          "#c2ecff"
+        ]
+      },
+      "margin": {
+        "role": "tertiary",
+        "displayName": "Registry Red",
+        "canonical": "oklch(0.62 0.17 25)",
+        "hex": "#da534f",
+        "tonalRamp": [
+          "#320000",
+          "#580000",
+          "#80161a",
+          "#a73e3b",
+          "#d0635d",
+          "#fa8880",
+          "#ffa89f",
+          "#ffc8bf"
+        ]
+      },
+      "destructive": {
+        "role": "tertiary",
+        "displayName": "Destructive Red",
+        "canonical": "oklch(0.52 0.19 27)",
+        "hex": "#be2323",
+        "tonalRamp": [
+          "#320000",
+          "#580000",
+          "#801616",
+          "#a73e37",
+          "#d06359",
+          "#fa887d",
+          "#ffa89c",
+          "#ffc9bb"
+        ]
+      },
+      "danger-soft": {
+        "role": "tertiary",
+        "displayName": "Blush",
+        "canonical": "oklch(0.955 0.03 25)",
+        "hex": "#ffe9e6",
+        "tonalRamp": [
+          "#160605",
+          "#34211f",
+          "#543f3d",
+          "#77605d",
+          "#9b8380",
+          "#c0a7a4",
+          "#e1c7c4",
+          "#ffe7e4"
+        ]
+      },
+      "success": {
+        "role": "tertiary",
+        "displayName": "Ledger Green",
+        "canonical": "oklch(0.48 0.12 155)",
+        "hex": "#00713e",
+        "tonalRamp": [
+          "#001600",
+          "#003505",
+          "#005626",
+          "#127946",
+          "#429e68",
+          "#6ac48c",
+          "#8ae5ab",
+          "#abffcb"
+        ]
+      },
+      "success-soft": {
+        "role": "tertiary",
+        "displayName": "Mint",
+        "canonical": "oklch(0.95 0.04 155)",
+        "hex": "#daf7e3",
+        "tonalRamp": [
+          "#001004",
+          "#152c1e",
+          "#344c3c",
+          "#546d5c",
+          "#77917f",
+          "#9bb6a3",
+          "#bad6c3",
+          "#daf7e3"
+        ]
+      },
+      "warning": {
+        "role": "tertiary",
+        "displayName": "Amber Ink",
+        "canonical": "oklch(0.5 0.12 65)",
+        "hex": "#915200",
+        "tonalRamp": [
+          "#280000",
+          "#4b0f00",
+          "#6e3200",
+          "#945500",
+          "#ba782e",
+          "#e29d56",
+          "#ffbd76",
+          "#ffde96"
+        ]
+      },
+      "warning-soft": {
+        "role": "tertiary",
+        "displayName": "Cream Amber",
+        "canonical": "oklch(0.96 0.05 85)",
+        "hex": "#fff0cc",
+        "tonalRamp": [
+          "#150800",
+          "#322405",
+          "#514324",
+          "#736445",
+          "#978767",
+          "#bdac8a",
+          "#ddcca9",
+          "#feedc9"
+        ]
+      },
+      "page": {
+        "role": "neutral",
+        "displayName": "Folha White",
+        "canonical": "oklch(1 0 0)",
+        "hex": "#ffffff",
+        "tonalRamp": [
+          "#0b0b0b",
+          "#262626",
+          "#454545",
+          "#666666",
+          "#898989",
+          "#aeaeae",
+          "#cecece",
+          "#eeeeee"
+        ]
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Desk Blue-Grey",
+        "canonical": "oklch(0.968 0.007 265)",
+        "hex": "#f2f4f9",
+        "tonalRamp": [
+          "#0a0b0e",
+          "#25262a",
+          "#434549",
+          "#64666a",
+          "#87898d",
+          "#acaeb2",
+          "#cbced2",
+          "#eceef3"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "oklch(0.23 0.045 270)",
+        "hex": "#151b32",
+        "tonalRamp": [
+          "#05091e",
+          "#1e253d",
+          "#3b445e",
+          "#5c6581",
+          "#7e88a5",
+          "#a3adcb",
+          "#c2cdec",
+          "#e2eeff"
+        ]
+      },
+      "muted-foreground": {
+        "role": "neutral",
+        "displayName": "Faded Ink",
+        "canonical": "oklch(0.47 0.035 268)",
+        "hex": "#525a6f",
+        "tonalRamp": [
+          "#060a1a",
+          "#1f2638",
+          "#3d4558",
+          "#5d667b",
+          "#80899f",
+          "#a4aec5",
+          "#c4cee5",
+          "#e4eeff"
+        ]
+      },
+      "secondary": {
+        "role": "neutral",
+        "displayName": "Wash (secondary)",
+        "canonical": "oklch(0.945 0.018 265)",
+        "hex": "#e7edf9",
+        "tonalRamp": [
+          "#080b13",
+          "#22262f",
+          "#40454f",
+          "#616671",
+          "#848994",
+          "#a8aeba",
+          "#c8ceda",
+          "#e9effb"
+        ]
+      },
+      "secondary-foreground": {
+        "role": "neutral",
+        "displayName": "Deep Ink",
+        "canonical": "oklch(0.28 0.08 270)",
+        "hex": "#1a2550",
+        "tonalRamp": [
+          "#03042c",
+          "#18224d",
+          "#344270",
+          "#546494",
+          "#7687ba",
+          "#9aace1",
+          "#b9ccff",
+          "#d9edff"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Wash (muted)",
+        "canonical": "oklch(0.955 0.012 265)",
+        "hex": "#ecf0f9",
+        "tonalRamp": [
+          "#090b10",
+          "#24262c",
+          "#42454c",
+          "#63666d",
+          "#868991",
+          "#aaaeb6",
+          "#caced6",
+          "#eaeff7"
+        ]
+      },
+      "accent": {
+        "role": "neutral",
+        "displayName": "Wash (accent)",
+        "canonical": "oklch(0.94 0.025 265)",
+        "hex": "#e3ebfd",
+        "tonalRamp": [
+          "#060b16",
+          "#202633",
+          "#3e4553",
+          "#5f6675",
+          "#828999",
+          "#a6aebe",
+          "#c6cedf",
+          "#e6efff"
+        ]
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Ruled Line",
+        "canonical": "oklch(0.9 0.032 262)",
+        "hex": "#d3dff4",
+        "tonalRamp": [
+          "#050b19",
+          "#1e2736",
+          "#3c4557",
+          "#5c6679",
+          "#7f8a9d",
+          "#a3aec3",
+          "#c3cee3",
+          "#e3efff"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Page Edge",
+        "canonical": "oklch(0.88 0.03 264)",
+        "hex": "#ced8ec",
+        "tonalRamp": [
+          "#050b18",
+          "#1f2635",
+          "#3d4556",
+          "#5d6678",
+          "#80899c",
+          "#a4aec2",
+          "#c4cee2",
+          "#e4efff"
+        ]
+      },
+      "input": {
+        "role": "neutral",
+        "displayName": "Field Stroke",
+        "canonical": "oklch(0.8 0.035 265)",
+        "hex": "#b3bed5",
+        "tonalRamp": [
+          "#050a1a",
+          "#1e2638",
+          "#3c4558",
+          "#5c667b",
+          "#7f899f",
+          "#a3aec5",
+          "#c3cee5",
+          "#e3efff"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline": {
+        "displayName": "Page Title",
+        "purpose": "PageHeader title from 640px; one per page."
+      },
+      "headline-phone": {
+        "displayName": "Page Title (phone)",
+        "purpose": "PageHeader title under 640px."
+      },
+      "title": {
+        "displayName": "Section Title",
+        "purpose": "Ruled Section headers and dialog titles."
+      },
+      "folio": {
+        "displayName": "Folio Line",
+        "purpose": "Italic record line under the page title; 18px from 640px."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Key numbers and ledger totals."
+      },
+      "ledger-value": {
+        "displayName": "Ledger Value",
+        "purpose": "Right-aligned ledger row values."
+      },
+      "list-name": {
+        "displayName": "List Name",
+        "purpose": "One person per ruled row."
+      },
+      "field": {
+        "displayName": "Field Text",
+        "purpose": "Inputs, selects, rail links."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All running text; descriptions max 60ch."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels, figure labels, table heads, nav captions; reading-text floor."
+      }
+    },
+    "shadows": [
+      {
+        "name": "floating-menu",
+        "value": "0 12px 32px -8px oklch(0.2 0.08 270 / 0.28)",
+        "purpose": "Select, popover, dropdown menus; always with a 1px border ring."
+      },
+      {
+        "name": "bottom-sheet",
+        "value": "0 -8px 40px -12px oklch(0.2 0.08 270 / 0.35)",
+        "purpose": "Dialogs rising from the bottom on mobile."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-change",
+        "value": "150ms ease-out",
+        "purpose": "Button, attendance and nav color/border/transform changes."
+      },
+      {
+        "name": "sheet",
+        "value": "200ms, slide-in-from-bottom 2rem + fade",
+        "purpose": "Dialog entry on mobile (0.5rem from 640px)."
+      },
+      {
+        "name": "menu",
+        "value": "100ms, fade + zoom-in-95",
+        "purpose": "Select, popover and dropdown entry."
+      },
+      {
+        "name": "stamp",
+        "value": "320ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Conferido stamp settle, scale 1.6/-14deg to 1/-6deg, once."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "1ms",
+        "purpose": "All animations and transitions collapse under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "40rem"
+      },
+      {
+        "name": "lg",
+        "value": "64rem"
+      }
+    ],
+    "focus": {
+      "value": "outline: 3px solid var(--ring); outline-offset: 2px",
+      "purpose": "Every focusable element; on the cover the outline uses cover-muted."
+    }
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one main action on a page or dialog: Novo lançamento, Entrar, Fechar o dia.",
+      "html": "<button class=\"ds-btn-primary\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/><path d=\"M12 5v14\"/></svg>Novo lançamento</button>",
+      "css": ".ds-btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 20px;border-radius:0.5rem;border:1px solid transparent;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,system-ui,sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:background-color 150ms ease-out,border-color 150ms ease-out,transform 150ms ease-out;} .ds-btn-primary:focus-visible{outline:3px solid var(--ring);outline-offset:2px;} .ds-btn-primary:active{transform:translateY(1px);} .ds-btn-primary{background:var(--primary);color:var(--primary-foreground);padding-left:16px;} .ds-btn-primary:hover{background:color-mix(in oklch,var(--primary),black 14%);}"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Secondary actions and dialog cancel: Importar CSV, Fechar, Todos presentes.",
+      "html": "<button class=\"ds-btn-outline\">Importar CSV</button>",
+      "css": ".ds-btn-outline{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 20px;border-radius:0.5rem;border:1px solid transparent;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,system-ui,sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:background-color 150ms ease-out,border-color 150ms ease-out,transform 150ms ease-out;} .ds-btn-outline:focus-visible{outline:3px solid var(--ring);outline-offset:2px;} .ds-btn-outline:active{transform:translateY(1px);} .ds-btn-outline{background:var(--page);color:var(--foreground);border-color:var(--input);} .ds-btn-outline:hover{border-color:color-mix(in oklch,var(--primary) 50%,transparent);background:var(--accent);}"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "refersTo": "button-destructive",
+      "description": "Confirming an irreversible delete inside a confirmation dialog.",
+      "html": "<button class=\"ds-btn-destructive\">Excluir lançamento</button>",
+      "css": ".ds-btn-destructive{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:48px;padding:0 20px;border-radius:0.5rem;border:1px solid transparent;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,system-ui,sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:background-color 150ms ease-out,border-color 150ms ease-out,transform 150ms ease-out;} .ds-btn-destructive:focus-visible{outline:3px solid var(--ring);outline-offset:2px;} .ds-btn-destructive:active{transform:translateY(1px);} .ds-btn-destructive{background:var(--destructive);color:#fff;} .ds-btn-destructive:hover{background:color-mix(in oklch,var(--destructive),black 14%);} .ds-btn-destructive:focus-visible{outline-color:var(--destructive);}"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "48px field, 17px text, ink-blue focus ring.",
+      "html": "<label class=\"ds-field\"><span class=\"ds-field-label\">Professor</span><input class=\"ds-input\" placeholder=\"Nome do professor\"></label>",
+      "css": ".ds-field{display:flex;flex-direction:column;gap:6px;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,sans-serif;} .ds-field-label{font-size:0.875rem;font-weight:600;color:var(--foreground);} .ds-input{height:48px;width:100%;border-radius:0.5rem;border:1px solid var(--input);background:var(--page);padding:8px 14px;font:inherit;font-size:1.0625rem;color:var(--foreground);caret-color:var(--primary);outline:none;transition:border-color 150ms,box-shadow 150ms;} .ds-input::placeholder{color:var(--muted-foreground);} .ds-input:focus-visible{border-color:var(--primary);box-shadow:0 0 0 3px color-mix(in oklch,var(--primary) 20%,transparent);}"
+    },
+    {
+      "name": "Attendance Control",
+      "kind": "custom",
+      "refersTo": "attendance-option",
+      "description": "Three-way Presente / Falta / N/A segmented row, 48px, icon plus word.",
+      "html": "<div class=\"ds-att\" role=\"group\" aria-label=\"Presença\"><button class=\"ds-att-opt ds-att-presente\" aria-pressed=\"true\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg>Presente</button><button class=\"ds-att-opt\" aria-pressed=\"false\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M18 6 6 18\"/><path d=\"m6 6 12 12\"/></svg>Falta</button><button class=\"ds-att-opt\" aria-pressed=\"false\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><path d=\"M5 12h14\"/></svg>N/A</button></div>",
+      "css": ".ds-att{display:grid;grid-template-columns:1.25fr 1fr 0.8fr;gap:6px;max-width:360px;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,sans-serif;} .ds-att-opt{display:flex;align-items:center;justify-content:center;gap:6px;height:48px;padding:0 8px;border-radius:0.5rem;border:2px solid var(--input);background:var(--page);color:var(--foreground);font:inherit;font-size:1rem;font-weight:600;cursor:pointer;transition:background-color 150ms ease-out,border-color 150ms ease-out,transform 150ms ease-out;} .ds-att-opt:hover{border-color:color-mix(in oklch,var(--primary) 50%,transparent);background:var(--accent);} .ds-att-opt:active{transform:scale(0.97);} .ds-att-opt:focus-visible{outline:3px solid var(--ring);outline-offset:2px;} .ds-att-presente,.ds-att-presente:hover{background:var(--success);border-color:var(--success);color:#fff;}"
+    },
+    {
+      "name": "Status Badges",
+      "kind": "chip",
+      "refersTo": "badge-success",
+      "description": "Soft-fill status tags: Entrada, Saída, Aberto.",
+      "html": "<span class=\"ds-badges\"><span class=\"ds-badge ds-badge-success\">Entrada</span><span class=\"ds-badge ds-badge-danger\">Saída</span><span class=\"ds-badge ds-badge-warning\">Aberto</span></span>",
+      "css": ".ds-badges{display:inline-flex;gap:8px;} .ds-badge{display:inline-flex;align-items:center;height:28px;padding:2px 10px;border-radius:0.4rem;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,sans-serif;font-size:0.875rem;font-weight:600;} .ds-badge-success{background:var(--success-soft);color:var(--success);} .ds-badge-danger{background:var(--danger-soft);color:var(--destructive);} .ds-badge-warning{background:var(--warning-soft);color:var(--warning);}"
+    },
+    {
+      "name": "Cover Rail",
+      "kind": "nav",
+      "refersTo": "rail-link",
+      "description": "Desktop navy rail: group label, links, inverted active link.",
+      "html": "<nav class=\"ds-rail\" aria-label=\"Menu\"><p class=\"ds-rail-group\">Financeiro</p><a class=\"ds-rail-link is-active\" href=\"#\" aria-current=\"page\">Lançamentos</a><a class=\"ds-rail-link\" href=\"#\">Saldos iniciais</a><a class=\"ds-rail-link\" href=\"#\">Relatórios</a></nav>",
+      "css": ".ds-rail{display:flex;flex-direction:column;gap:2px;width:256px;padding:16px 12px;background:var(--cover);font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,sans-serif;} .ds-rail-group{margin:0 0 6px;padding:0 12px;font-size:0.875rem;font-weight:600;color:var(--cover-muted);} .ds-rail-link{display:flex;align-items:center;min-height:44px;padding:8px 12px;border-radius:0.5rem;font-size:1.0625rem;color:color-mix(in oklch,var(--cover-foreground) 90%,transparent);text-decoration:none;transition:background-color 150ms,color 150ms;} .ds-rail-link:hover{background:var(--cover-accent);color:var(--cover-foreground);} .ds-rail-link:focus-visible{outline:3px solid var(--cover-muted);outline-offset:2px;} .ds-rail-link.is-active{background:var(--cover-foreground);color:var(--cover);font-weight:600;}"
+    },
+    {
+      "name": "Folha with Page Header",
+      "kind": "card",
+      "refersTo": "headline",
+      "description": "The white page with red margin rule, serif title, italic folio and heavy header rule.",
+      "html": "<div class=\"ds-folha\"><header class=\"ds-ph\"><h1 class=\"ds-ph-title\">Segunda, 26 de outubro</h1><p class=\"ds-ph-folio\">Folha nº 4 · 4º trimestre / 2026 · Lição 4</p></header><div class=\"ds-sec\"><h2 class=\"ds-sec-title\">Chamada <span class=\"ds-sec-count\">17 alunos</span></h2></div></div>",
+      "css": ".ds-folha{position:relative;background:var(--page);padding:24px 16px 24px 48px;border-radius:0.5rem;box-shadow:0 0 0 1px var(--border);max-width:560px;} .ds-folha::before{content:'';position:absolute;top:0;bottom:0;left:1.75rem;width:1px;background:var(--margin);opacity:0.55;} .ds-ph{border-bottom:2px solid color-mix(in oklch,var(--foreground) 80%,transparent);padding-bottom:16px;} .ds-ph-title{margin:0;font-family:'Source Serif 4 Variable',ui-serif,Georgia,serif;font-size:1.75rem;line-height:1.15;font-weight:600;letter-spacing:-0.01em;color:var(--foreground);} .ds-ph-folio{margin:6px 0 0;font-family:'Source Serif 4 Variable',ui-serif,Georgia,serif;font-style:italic;font-size:1.0625rem;color:var(--muted-foreground);font-variant-numeric:tabular-nums lining-nums;} .ds-sec{margin-top:32px;border-bottom:1px solid var(--rule);padding-bottom:10px;} .ds-sec-title{margin:0;font-family:'Source Serif 4 Variable',ui-serif,Georgia,serif;font-size:1.5rem;font-weight:600;color:var(--foreground);} .ds-sec-count{margin-left:8px;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,sans-serif;font-size:1.125rem;font-weight:400;color:var(--muted-foreground);}"
+    },
+    {
+      "name": "Ledger",
+      "kind": "custom",
+      "refersTo": "ledger-value",
+      "description": "Label left, serif tabular value right, ruled; total under a double rule.",
+      "html": "<dl class=\"ds-ledger\"><div class=\"ds-led-row\"><dt>Entradas</dt><dd class=\"pos\">+ R$ 3.162,50</dd></div><div class=\"ds-led-row\"><dt>Saídas</dt><dd class=\"neg\">− R$ 1.858,90</dd></div><div class=\"ds-led-row ds-led-total\"><dt>Saldo</dt><dd>R$ 1.303,60</dd></div></dl>",
+      "css": ".ds-ledger{margin:0;max-width:420px;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,sans-serif;} .ds-led-row{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:12px 0;border-bottom:1px solid var(--rule);} .ds-led-row dt{font-size:1rem;font-weight:600;color:var(--muted-foreground);} .ds-led-row dd{margin:0;font-family:'Source Serif 4 Variable',ui-serif,Georgia,serif;font-size:1.375rem;font-weight:600;line-height:1.25;font-variant-numeric:tabular-nums lining-nums;color:var(--foreground);} .ds-led-row dd.pos{color:var(--success);} .ds-led-row dd.neg{color:var(--destructive);} .ds-led-total{margin-top:4px;border-bottom:0;border-top:3px double color-mix(in oklch,var(--foreground) 70%,transparent);} .ds-led-total dt{font-weight:700;color:var(--foreground);} .ds-led-total dd{font-size:1.75rem;}"
+    },
+    {
+      "name": "Conferido Stamp",
+      "kind": "custom",
+      "refersTo": "stamp",
+      "description": "Closes a record; plays one 320ms settle, instant under reduced motion.",
+      "html": "<span class=\"ds-stamp\"><span class=\"ds-stamp-word\">Conferido</span><span class=\"ds-stamp-detail\">2026</span></span>",
+      "css": "@keyframes ds-stamp{0%{opacity:0;transform:scale(1.6) rotate(-14deg);}60%{opacity:1;}100%{opacity:1;transform:scale(1) rotate(-6deg);}} .ds-stamp{display:inline-flex;flex-direction:column;align-items:center;padding:4px 12px;border:3px double var(--margin);border-radius:0.4rem;color:var(--margin);text-transform:uppercase;transform:rotate(-6deg);user-select:none;animation:ds-stamp 320ms cubic-bezier(0.16,1,0.3,1) both;} .ds-stamp:hover{animation:none;} .ds-stamp-word{font-family:'Source Serif 4 Variable',ui-serif,Georgia,serif;font-size:1.125rem;line-height:1;font-weight:700;letter-spacing:0.12em;} .ds-stamp-detail{margin-top:2px;font-family:'Atkinson Hyperlegible Next Variable',ui-sans-serif,sans-serif;font-size:0.75rem;line-height:1;font-weight:600;letter-spacing:0.05em;font-variant-numeric:tabular-nums;} @media (prefers-reduced-motion:reduce){.ds-stamp{animation:none;}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Registro Book",
+    "overview": "Every screen is a page of the church's own livro de registro. The shell is the book's navy cloth cover, taken from the indigo in the church seal. The content is a white folha with pale blue ruled lines and one thin red margin rule near its left edge. A page opens with a serif title and an italic folio line (\"Folha nº 4 · 4º trimestre / 2026 · Lição 4\"), a heavy rule closes the header, and ruled blocks follow. A closed record gets a double-bordered red \"Conferido\" stamp. Rules and rows carry the structure. Boxes, cards and shadows do not.\n\nThe world is built for volunteers aged 40 and up, often standing with a phone in one hand on a Sunday morning. That sets the density. Base text is 16px, list names 18px, field text 17px. Buttons, fields and attendance controls are 48px tall, and every link and row target is at least 44px. Serif scale contrast does the hierarchy work: a 40px serif title over 16px humanist sans. Weight and color do much less of it.\n\nThe palette is restrained. Ink blue is for action, red is for the margin, for destructive actions and for the stamp, and green and amber mark money direction and status. Dark mode keeps the same book: a deeper navy cover and dark ink-blue folhas, with every role re-tuned in `.dark`.",
+    "keyCharacteristics": [
+      "Navy book-cloth shell (desktop rail and mobile top bar). White folha content surface with a red margin rule.",
+      "Serif (Source Serif 4) for titles, folios and numbers that matter. Atkinson Hyperlegible Next for UI, labels and data.",
+      "Rows and rules, not cards. The header closes with a 2px ink rule, sections with a pale blue rule, totals with a double rule.",
+      "Big, labelled targets: 48px is the default control height, never under 44px.",
+      "One signature moment: the \"Conferido\" ink stamp, pressed with a short scale-and-rotate settle.",
+      "Money is tabular, right-aligned and signed: \"+ R$\" in green for entradas, \"− R$\" in red for saídas."
+    ],
+    "rules": [
+      {
+        "name": "The Three Reds Rule",
+        "body": "Red appears in three places only: the margin rule, destructive or negative meaning, and the stamp. A red heading, a red link or a red decoration is off-system.",
+        "section": "colors"
+      },
+      {
+        "name": "The White Folha Rule",
+        "body": "Content surfaces are pure white (`page`), never cream or tinted paper. The off-white `background` is the desk, not the page.",
+        "section": "colors"
+      },
+      {
+        "name": "The Cover Is Chrome Rule",
+        "body": "Navy belongs to navigation: the rail and the top bar. Content never sits on navy.",
+        "section": "colors"
+      },
+      {
+        "name": "The Serif Means Record Rule",
+        "body": "Serif is for what is written into the book: titles, folios and the figures a treasurer reads. Buttons, labels, fields and table data stay in Atkinson.",
+        "section": "typography"
+      },
+      {
+        "name": "The Hierarchy-by-Scale Rule",
+        "body": "Rank comes from serif size contrast and rules, not from boxes, color blocks or uppercase. Uppercase with tracking belongs only to the stamp.",
+        "section": "typography"
+      },
+      {
+        "name": "The Rules Not Shadows Rule",
+        "body": "Nothing on the folha casts a shadow. To group content, use a ruled Section header. To close a sum, use the double rule. Shadows belong only to menus and sheets that float above the page.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do put every screen inside `Page` (the folha) and open it with `PageHeader`: serif title, italic folio line, 2px ink rule.",
+      "Do group content with `Section`: a 24px serif title, an optional count and action, and a `rule` line beneath.",
+      "Do make every control at least 44px tall, with 48px as the default. Use 17px text in fields and 18px for names in lists.",
+      "Do pair every status color with a word and an icon: \"Presente\" with a check, \"Falta\" with an X, \"Entrada\" or \"Saída\" with arrows.",
+      "Do set money and counts with `num` (tabular lining figures), right-aligned and signed, green for entradas and red for saídas.",
+      "Do close a record with the \"Conferido\" stamp and keep its single 320ms settle. State changes elsewhere use 150–200ms ease-out.",
+      "Do tune both `:root` and `.dark` whenever you add a color role."
+    ],
+    "donts": [
+      "Don't use red outside the margin rule, destructive or negative meaning, and the stamp.",
+      "Don't box sections in cards, nest cards, or use shadows for hierarchy on the folha. Use rules.",
+      "Don't put content on the navy cover, or tint the folha cream.",
+      "Don't set buttons, labels or data in the serif, or titles in the sans.",
+      "Don't add uppercase or letter-spaced labels above titles. Tracking and uppercase belong only to the stamp.",
+      "Don't set reading text below 14px, or ship icon-only actions without a visible label (dialog close and the account avatar excepted).",
+      "Don't recolor, crop or filter the church seal. Church name and logo come from data, never hard-coded."
+    ]
+  }
+}

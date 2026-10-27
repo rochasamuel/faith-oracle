@@ -211,16 +211,16 @@ export function GenerateReportDialog() {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Gerar relatório</DialogTitle>
+          <DialogTitle>Gerar relatório financeiro</DialogTitle>
           <DialogDescription>
-            Escolha o período a ser apurado. O resumo financeiro é calculado a
-            partir dos lançamentos do intervalo.
+            Escolha o período. O resumo é calculado a partir dos lançamentos
+            registrados nesse intervalo e sai no PDF da prestação de contas.
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleGenerate} className="flex flex-col gap-4" noValidate>
           <div className="flex flex-col gap-2">
-            <Label>Tipo de relatório</Label>
+            <Label htmlFor="report-type">Tipo de relatório</Label>
             <Select
               items={periodTypeItems}
               value={periodType}
@@ -229,7 +229,7 @@ export function GenerateReportDialog() {
                 setPeriodError(null)
               }}
             >
-              <SelectTrigger className="h-9 w-full">
+              <SelectTrigger id="report-type" className="w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -241,7 +241,7 @@ export function GenerateReportDialog() {
 
           {periodType === "anual" ? (
             <div className="flex flex-col gap-2">
-              <Label>Ano de referência</Label>
+              <Label htmlFor="report-year-annual">Ano de referência</Label>
               <Select
                 items={Object.fromEntries(
                   yearOptions.map((y) => [String(y), String(y)])
@@ -253,10 +253,11 @@ export function GenerateReportDialog() {
                 }}
               >
                 <SelectTrigger
-                  className="h-9 w-full"
+                  id="report-year-annual"
+                  className="w-full"
                   aria-invalid={!!periodError}
                 >
-                  <SelectValue placeholder="Selecione o ano" />
+                  <SelectValue placeholder="Escolha o ano" />
                 </SelectTrigger>
                 <SelectContent>
                   {yearOptions.map((y) => (
@@ -267,12 +268,12 @@ export function GenerateReportDialog() {
                 </SelectContent>
               </Select>
               {periodError && (
-                <p className="text-xs text-destructive">{periodError}</p>
+                <p role="alert" className="text-sm text-destructive">{periodError}</p>
               )}
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              <Label className="flex items-center gap-2">
+              <Label className="flex min-h-11 items-center gap-3 text-base">
                 <Checkbox
                   checked={customPeriod}
                   onCheckedChange={(checked) => {
@@ -280,24 +281,25 @@ export function GenerateReportDialog() {
                     setPeriodError(null)
                   }}
                 />
-                Período personalizado
+                Usar outro período (escolher datas de início e fim)
               </Label>
 
               {customPeriod ? (
                 <div className="flex flex-col gap-2">
-                  <Label>Período de apuração</Label>
+                  <Label htmlFor="report-range">Período de apuração</Label>
                   <Popover open={dateOpen} onOpenChange={setDateOpen}>
                     <PopoverTrigger
                       render={
                         <Button
+                          id="report-range"
                           variant="outline"
                           aria-invalid={!!periodError}
                           className={cn(
-                            "h-9 w-full justify-start gap-2 font-normal",
+                            "w-full justify-start gap-2 font-normal",
                             !range?.from && "text-muted-foreground"
                           )}
                         >
-                          <CalendarIcon className="size-4" />
+                          <CalendarIcon aria-hidden />
                           {range?.from ? (
                             range.to ? (
                               <>
@@ -326,9 +328,9 @@ export function GenerateReportDialog() {
                   </Popover>
                 </div>
               ) : (
-                <div className="flex gap-2">
-                  <div className="flex flex-1 flex-col gap-2">
-                    <Label>Mês</Label>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="report-month">Mês</Label>
                     <Select
                       items={Object.fromEntries(
                         monthOptions.map((m) => [String(m.value), m.label])
@@ -339,8 +341,12 @@ export function GenerateReportDialog() {
                         setPeriodError(null)
                       }}
                     >
-                      <SelectTrigger className="h-9 w-full" aria-invalid={!!periodError}>
-                        <SelectValue placeholder="Mês" />
+                      <SelectTrigger
+                        id="report-month"
+                        className="w-full"
+                        aria-invalid={!!periodError}
+                      >
+                        <SelectValue placeholder="Escolha o mês" />
                       </SelectTrigger>
                       <SelectContent>
                         {monthOptions.map((m) => (
@@ -351,8 +357,8 @@ export function GenerateReportDialog() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="flex flex-1 flex-col gap-2">
-                    <Label>Ano</Label>
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="report-year">Ano</Label>
                     <Select
                       items={Object.fromEntries(
                         yearOptions.map((y) => [String(y), String(y)])
@@ -363,8 +369,12 @@ export function GenerateReportDialog() {
                         setPeriodError(null)
                       }}
                     >
-                      <SelectTrigger className="h-9 w-full" aria-invalid={!!periodError}>
-                        <SelectValue placeholder="Ano" />
+                      <SelectTrigger
+                        id="report-year"
+                        className="w-full"
+                        aria-invalid={!!periodError}
+                      >
+                        <SelectValue placeholder="Escolha o ano" />
                       </SelectTrigger>
                       <SelectContent>
                         {yearOptions.map((y) => (
@@ -379,25 +389,26 @@ export function GenerateReportDialog() {
               )}
 
               {periodError && (
-                <p className="text-xs text-destructive">{periodError}</p>
+                <p role="alert" className="text-sm text-destructive">{periodError}</p>
               )}
             </div>
           )}
 
           <div className="flex flex-col gap-2">
-            <Label>Data de conferência</Label>
+            <Label htmlFor="report-conferred-at">Data de conferência</Label>
             <Popover open={conferredAtOpen} onOpenChange={setConferredAtOpen}>
               <PopoverTrigger
                 render={
                   <Button
+                    id="report-conferred-at"
                     variant="outline"
                     aria-invalid={!conferredAt && !!periodError}
                     className={cn(
-                      "h-9 w-full justify-start gap-2 font-normal",
+                      "w-full justify-start gap-2 font-normal",
                       !conferredAt && "text-muted-foreground"
                     )}
                   >
-                    <CalendarIcon className="size-4" />
+                    <CalendarIcon aria-hidden />
                     {conferredAt
                       ? formatDateBR(conferredAt)
                       : "Selecione uma data"}
@@ -418,8 +429,11 @@ export function GenerateReportDialog() {
                 />
               </PopoverContent>
             </Popover>
+            <p className="text-sm text-muted-foreground">
+              Dia em que as contas foram conferidas. Sai impresso no PDF.
+            </p>
             {!conferredAt && periodError && (
-              <p className="text-xs text-destructive">{periodError}</p>
+              <p role="alert" className="text-sm text-destructive">{periodError}</p>
             )}
           </div>
 
@@ -444,7 +458,11 @@ export function GenerateReportDialog() {
               Cancelar
             </Button>
             <Button type="submit" disabled={isBusy}>
-              {isBusy && <Loader2Icon className="animate-spin" />}
+              {isBusy ? (
+                <Loader2Icon className="animate-spin" />
+              ) : (
+                <FilePlus2Icon />
+              )}
               {isBusy ? "Gerando..." : "Gerar relatório"}
             </Button>
           </DialogFooter>

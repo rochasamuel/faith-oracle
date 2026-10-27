@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { Stamp } from "@/components/page"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { parseISO } from "date-fns"
@@ -30,7 +31,6 @@ import type { Report } from "@/api/reports"
 import {
   formatReferenceLabel,
   REPORT_PERIOD_TYPE_LABELS,
-  REPORT_STATUS_CLASSES,
   REPORT_STATUS_LABELS,
 } from "@/features/relatorios/constants"
 import { useInvalidateReport } from "@/features/relatorios/hooks"
@@ -73,16 +73,27 @@ function SortableHead({
       : ArrowDownIcon
 
   return (
-    <TableHead className={className}>
+    <TableHead
+      className={className}
+      aria-sort={
+        active ? (sort.dir === "asc" ? "ascending" : "descending") : undefined
+      }
+    >
       <Button
         variant="ghost"
         size="sm"
-        className={cn("-mx-2 gap-1", active && "text-foreground")}
+        className={cn(
+          "-mx-3 gap-1.5 text-muted-foreground",
+          active && "text-foreground"
+        )}
         onClick={() => onToggleSort(sortKey)}
         aria-label={`Ordenar por ${label}`}
       >
         {label}
-        <Icon className={cn("size-3.5", active ? "opacity-100" : "opacity-50")} />
+        <Icon
+          aria-hidden
+          className={cn("size-4", active ? "opacity-100" : "opacity-50")}
+        />
       </Button>
     </TableHead>
   )
@@ -132,17 +143,17 @@ export function ReportTable({ reports, sort, onToggleSort }: ReportTableProps) {
 
   return (
     <>
-      <div className="overflow-hidden rounded-lg border border-border">
+      {/* md+: tabela pautada */}
+      <div className="hidden md:block">
         <Table>
           <TableHeader>
-            <TableRow>
+            <TableRow className="hover:bg-transparent">
               <SortableHead
                 label="Referência"
                 sortKey="reference"
                 sort={sort}
                 onToggleSort={onToggleSort}
               />
-              <TableHead>Tipo</TableHead>
               <TableHead>Período</TableHead>
               <SortableHead
                 label="Status"
@@ -158,82 +169,59 @@ export function ReportTable({ reports, sort, onToggleSort }: ReportTableProps) {
                 className="text-right [&>button]:ml-auto"
               />
               <SortableHead
-                label="Geração"
+                label="Gerado em"
                 sortKey="created_at"
                 sort={sort}
                 onToggleSort={onToggleSort}
-                className="w-28"
               />
-              <TableHead className="w-20" />
+              <TableHead>
+                <span className="sr-only">Ações</span>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {reports.map((report) => {
               const invalidated = report.status === "invalidado"
               return (
-                <TableRow
-                  key={report.id}
-                  className={cn(invalidated && "opacity-60")}
-                >
-                  <TableCell className="font-medium">
-                    {formatReferenceLabel(report)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">
-                      {REPORT_PERIOD_TYPE_LABELS[report.period_type]}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground tabular-nums">
-                    {dateISOToBR(report.period_start)} –{" "}
-                    {dateISOToBR(report.period_end)}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="secondary"
-                      className={cn("border", REPORT_STATUS_CLASSES[report.status])}
+                <TableRow key={report.id}>
+                  <TableCell className="py-3.5">
+                    <p
+                      className={cn(
+                        "font-semibold",
+                        invalidated && "text-muted-foreground line-through"
+                      )}
                     >
-                      {REPORT_STATUS_LABELS[report.status]}
-                    </Badge>
+                      {formatReferenceLabel(report)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {REPORT_PERIOD_TYPE_LABELS[report.period_type]}
+                    </p>
                   </TableCell>
-                  <TableCell
-                    className={cn(
-                      "text-right font-medium tabular-nums",
-                      report.balance >= 0
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-rose-600 dark:text-rose-400"
-                    )}
-                  >
-                    {formatBRL(report.balance)}
+                  <TableCell className="num font-type whitespace-nowrap text-muted-foreground">
+                    {formatPeriod(report)}
                   </TableCell>
-                  <TableCell className="text-muted-foreground tabular-nums">
+                  <TableCell>
+                    <ReportStatusMark report={report} />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Balance report={report} />
+                  </TableCell>
+                  <TableCell className="num font-type whitespace-nowrap text-muted-foreground">
                     {dateISOToBR(report.created_at)}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center justify-end gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Baixar relatório"
-                        disabled={downloadingId === report.id}
-                        onClick={() => handleDownload(report)}
-                      >
-                        {downloadingId === report.id ? (
-                          <Loader2Icon className="animate-spin" />
-                        ) : (
-                          <DownloadIcon className="text-muted-foreground" />
-                        )}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon-sm"
-                        aria-label="Invalidar relatório"
-                        disabled={invalidated}
-                        onClick={() => setPending(report)}
-                      >
-                        <BanIcon
-                          className={cn(!invalidated && "text-destructive")}
+                    <div className="flex items-center justify-end gap-1.5">
+                      <DownloadButton
+                        report={report}
+                        downloading={downloadingId === report.id}
+                        onDownload={handleDownload}
+                      />
+                      {!invalidated && (
+                        <InvalidateButton
+                          report={report}
+                          onInvalidate={setPending}
                         />
-                      </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -242,6 +230,56 @@ export function ReportTable({ reports, sort, onToggleSort }: ReportTableProps) {
           </TableBody>
         </Table>
       </div>
+
+      {/* abaixo de md: lista pautada empilhada */}
+      <ul className="flex flex-col border-t border-rule md:hidden">
+        {reports.map((report) => {
+          const invalidated = report.status === "invalidado"
+          return (
+            <li
+              key={report.id}
+              className="flex flex-col gap-3 border-b border-rule py-4"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0">
+                  <p
+                    className={cn(
+                      "text-[1.125rem] leading-snug font-semibold",
+                      invalidated && "text-muted-foreground line-through"
+                    )}
+                  >
+                    {formatReferenceLabel(report)}
+                  </p>
+                  <p className="num font-type text-base text-muted-foreground">
+                    {REPORT_PERIOD_TYPE_LABELS[report.period_type]} ·{" "}
+                    {formatPeriod(report)}
+                  </p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <span className="sr-only">Saldo: </span>
+                  <Balance report={report} />
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                <ReportStatusMark report={report} />
+                <p className="num font-type text-sm text-muted-foreground">
+                  Gerado em {dateISOToBR(report.created_at)}
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2.5 [&>*]:flex-1">
+                <DownloadButton
+                  report={report}
+                  downloading={downloadingId === report.id}
+                  onDownload={handleDownload}
+                />
+                {!invalidated && (
+                  <InvalidateButton report={report} onInvalidate={setPending} />
+                )}
+              </div>
+            </li>
+          )
+        })}
+      </ul>
 
       <InvalidateReportDialog
         key={pending?.id ?? "none"}
@@ -253,5 +291,104 @@ export function ReportTable({ reports, sort, onToggleSort }: ReportTableProps) {
         isInvalidating={invalidateReport.isPending}
       />
     </>
+  )
+}
+
+function formatPeriod(report: Report): string {
+  return `${dateISOToBR(report.period_start)} – ${dateISOToBR(report.period_end)}`
+}
+
+/** Saldo do período: sinal explícito e cor (entrada = verde, saída = vermelho). */
+function Balance({ report }: { report: Report }) {
+  const invalidated = report.status === "invalidado"
+  const negative = report.balance < 0
+  return (
+    <span
+      className={cn(
+        "num font-semibold whitespace-nowrap",
+        invalidated
+          ? "text-muted-foreground"
+          : negative
+            ? "text-destructive"
+            : "text-success"
+      )}
+    >
+      {negative ? "−" : "+"} {formatBRL(Math.abs(report.balance))}
+    </span>
+  )
+}
+
+/**
+ * Marca de status: relatório concluído leva o carimbo "Conferido" (registro
+ * fechado); os demais estados usam um selo com texto.
+ */
+function ReportStatusMark({ report }: { report: Report }) {
+  if (report.status === "concluido") {
+    return (
+      <Stamp
+        detail={
+          report.conferred_at ? dateISOToBR(report.conferred_at) : undefined
+        }
+        className="origin-left scale-75"
+      />
+    )
+  }
+  return (
+    <Badge variant={STATUS_BADGE_VARIANT[report.status]}>
+      {REPORT_STATUS_LABELS[report.status]}
+    </Badge>
+  )
+}
+
+const STATUS_BADGE_VARIANT: Record<
+  Exclude<Report["status"], "concluido">,
+  "warning" | "destructive" | "outline"
+> = {
+  processando: "warning",
+  erro: "destructive",
+  invalidado: "outline",
+}
+
+function DownloadButton({
+  report,
+  downloading,
+  onDownload,
+}: {
+  report: Report
+  downloading: boolean
+  onDownload: (report: Report) => void
+}) {
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      disabled={downloading}
+      onClick={() => onDownload(report)}
+      aria-label={`Baixar PDF do relatório de ${formatReferenceLabel(report)}`}
+    >
+      {downloading ? <Loader2Icon className="animate-spin" /> : <DownloadIcon />}
+      {downloading ? "Gerando PDF..." : "Baixar PDF"}
+    </Button>
+  )
+}
+
+function InvalidateButton({
+  report,
+  onInvalidate,
+}: {
+  report: Report
+  onInvalidate: (report: Report) => void
+}) {
+  return (
+    <Button
+      variant="ghost"
+      size="sm"
+      className="text-destructive hover:bg-danger-soft hover:text-destructive"
+      onClick={() => onInvalidate(report)}
+      aria-label={`Invalidar relatório de ${formatReferenceLabel(report)}`}
+    >
+      <BanIcon />
+      Invalidar
+    </Button>
   )
 }

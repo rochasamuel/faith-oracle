@@ -2,17 +2,12 @@ import * as React from "react"
 import { z } from "zod"
 import { ptBR } from "date-fns/locale"
 import { parseISO } from "date-fns"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, CheckIcon } from "lucide-react"
+
+import { Section } from "@/components/page"
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -88,11 +83,13 @@ interface MemberFormProps {
 
 /** Campo de data com popover + calendário (anos via dropdown). */
 function DateField({
+  id,
   label,
   value,
   onChange,
   disabled,
 }: {
+  id: string
   label: string
   value: Date | undefined
   onChange: (value: Date | undefined) => void
@@ -102,20 +99,24 @@ function DateField({
 
   return (
     <div className="flex flex-col gap-2">
-      <Label>{label}</Label>
+      <Label htmlFor={id}>{label}</Label>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger
           render={
             <Button
+              id={id}
+              type="button"
               variant="outline"
               disabled={disabled}
               className={cn(
-                "h-9 w-full justify-start gap-2 font-normal",
+                "w-full justify-start gap-2.5 px-3.5 text-[1.0625rem] font-normal",
                 !value && "text-muted-foreground"
               )}
             >
-              <CalendarIcon className="size-4" />
-              {value ? formatDateBR(value) : "Selecione uma data"}
+              <CalendarIcon className="text-muted-foreground" />
+              <span className="num">
+                {value ? formatDateBR(value) : "Escolher a data"}
+              </span>
             </Button>
           }
         />
@@ -139,24 +140,122 @@ function DateField({
   )
 }
 
-function FormSection({
-  title,
-  description,
+/** Campo de texto com rótulo em cima e mensagem de erro embaixo. */
+function TextField({
+  id,
+  label,
+  error,
+  hint,
+  ...inputProps
+}: Omit<React.ComponentProps<typeof Input>, "id"> & {
+  id: string
+  label: string
+  error?: string
+  hint?: string
+}) {
+  const describedBy = error ? `${id}-erro` : hint ? `${id}-dica` : undefined
+  return (
+    <div className="flex flex-col gap-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Input
+        id={id}
+        aria-invalid={!!error}
+        aria-describedby={describedBy}
+        {...inputProps}
+      />
+      {error ? (
+        <p id={`${id}-erro`} className="text-sm font-semibold text-destructive">
+          {error}
+        </p>
+      ) : (
+        hint && (
+          <p id={`${id}-dica`} className="text-sm text-muted-foreground">
+            {hint}
+          </p>
+        )
+      )}
+    </div>
+  )
+}
+
+/** Campo de escolha (Select) com rótulo em cima. */
+function SelectField({
+  id,
+  label,
+  items,
+  value,
+  onValueChange,
+  placeholder,
   children,
 }: {
-  title: string
-  description?: string
+  id: string
+  label: string
+  items: Record<string, string>
+  value: string | null
+  onValueChange: (value: string) => void
+  placeholder: string
   children: React.ReactNode
 }) {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
-      </CardHeader>
-      <CardContent className="flex flex-col gap-4">{children}</CardContent>
-    </Card>
+    <div className="flex flex-col gap-2">
+      <Label htmlFor={id}>{label}</Label>
+      <Select
+        items={items}
+        value={value}
+        onValueChange={(next) => onValueChange(next as string)}
+      >
+        <SelectTrigger id={id} className="w-full data-[size=default]:h-12">
+          <SelectValue placeholder={placeholder} />
+        </SelectTrigger>
+        <SelectContent alignItemWithTrigger={false}>{children}</SelectContent>
+      </Select>
+    </div>
   )
+}
+
+/** Caixa de marcar com a linha inteira clicável (alvo ≥ 44px). */
+function CheckField({
+  id,
+  label,
+  checked,
+  onCheckedChange,
+}: {
+  id: string
+  label: string
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+}) {
+  return (
+    <div className="flex min-h-11 items-center gap-3">
+      <Checkbox
+        id={id}
+        checked={checked}
+        onCheckedChange={(next) => onCheckedChange(next === true)}
+      />
+      <Label htmlFor={id} className="min-h-11 flex-1 cursor-pointer">
+        {label}
+      </Label>
+    </div>
+  )
+}
+
+/** Id do campo na tela para cada chave do schema (foco no primeiro erro). */
+const FIELD_IDS: Record<keyof FieldErrors, string> = {
+  nomeCompleto: "nome-completo",
+  naturalidade: "naturalidade",
+  nomeConjuge: "nome-conjuge",
+  rg: "rg",
+  orgaoEmissor: "orgao-emissor",
+  cpf: "cpf",
+  nomeMae: "nome-mae",
+  nomePai: "nome-pai",
+  profissao: "profissao",
+  endereco: "endereco",
+  cidade: "cidade",
+  cep: "cep",
+  telefone: "telefone",
+  email: "email",
+  batismoAguasIgreja: "batismo-igreja",
 }
 
 export function MemberForm({
@@ -314,6 +413,10 @@ export function MemberForm({
         if (!fieldErrors[key]) fieldErrors[key] = issue.message
       }
       setErrors(fieldErrors)
+      const first = result.error.issues[0]?.path[0] as
+        | keyof FieldErrors
+        | undefined
+      if (first) document.getElementById(FIELD_IDS[first])?.focus()
       return
     }
 
@@ -381,466 +484,400 @@ export function MemberForm({
     !fotoPreview && !fotoRemovida ? (member?.foto_path ?? null) : null
   const temFoto = !!fotoAtualSrc || !!fotoAtualPath
 
+  const salvando = isSubmitting || enviandoFoto
+  const errorCount = Object.keys(errors).length + (fotoError ? 1 : 0)
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
-      <FormSection title="Foto">
-        <div className="flex items-center gap-4">
-          <MemberAvatar
-            nome={nomeCompleto || "?"}
-            fotoPath={fotoAtualPath}
-            src={fotoAtualSrc}
-            className="size-20 text-lg"
-          />
-          <div className="flex flex-col gap-2">
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => fotoInputRef.current?.click()}
-              >
-                {temFoto ? "Trocar foto" : "Escolher foto"}
-              </Button>
-              {temFoto && (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-10" noValidate>
+      <Section title="Dados pessoais">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-5">
+            <MemberAvatar
+              nome={nomeCompleto || "?"}
+              fotoPath={fotoAtualPath}
+              src={fotoAtualSrc}
+              className="size-24 text-xl"
+            />
+            <div className="flex flex-col gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  onClick={handleFotoRemove}
+                  onClick={() => fotoInputRef.current?.click()}
                 >
-                  Remover
+                  {temFoto ? "Trocar foto" : "Escolher foto"}
                 </Button>
+                {temFoto && (
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleFotoRemove}
+                  >
+                    Tirar a foto
+                  </Button>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Opcional. Imagem JPG ou PNG de até 5MB.
+              </p>
+              {fotoError && (
+                <p role="alert" className="text-sm font-semibold text-destructive">
+                  {fotoError}
+                </p>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">
-              Imagem JPG ou PNG de até 5MB.
-            </p>
-            {fotoError && (
-              <p className="text-xs text-destructive">{fotoError}</p>
-            )}
+            <input
+              ref={fotoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              aria-label="Escolher foto do membro"
+              onChange={handleFotoChange}
+            />
           </div>
-          <input
-            ref={fotoInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleFotoChange}
-          />
-        </div>
-      </FormSection>
 
-      <FormSection title="Dados pessoais">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="nome-completo">Nome completo</Label>
-          <Input
+          <TextField
             id="nome-completo"
-            className="h-9 text-sm"
+            label="Nome completo"
+            autoComplete="off"
             value={nomeCompleto}
-            aria-invalid={!!errors.nomeCompleto}
+            error={errors.nomeCompleto}
+            hint="Obrigatório."
             onChange={(e) => setNomeCompleto(e.target.value)}
           />
-          {errors.nomeCompleto && (
-            <p className="text-xs text-destructive">{errors.nomeCompleto}</p>
-          )}
-        </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <DateField
-            label="Data de nascimento"
-            value={dataNascimento}
-            onChange={setDataNascimento}
-          />
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="naturalidade">Naturalidade</Label>
-            <Input
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <DateField
+              id="data-nascimento"
+              label="Data de nascimento"
+              value={dataNascimento}
+              onChange={setDataNascimento}
+            />
+            <TextField
               id="naturalidade"
-              className="h-9 text-sm"
+              label="Naturalidade"
+              placeholder="Cidade onde nasceu"
               value={naturalidade}
-              aria-invalid={!!errors.naturalidade}
+              error={errors.naturalidade}
               onChange={(e) => setNaturalidade(e.target.value)}
             />
-            {errors.naturalidade && (
-              <p className="text-xs text-destructive">{errors.naturalidade}</p>
-            )}
           </div>
-        </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label>Estado civil</Label>
-            <Select
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <SelectField
+              id="estado-civil"
+              label="Estado civil"
               items={ESTADO_CIVIL_LABELS}
               value={estadoCivil}
               onValueChange={(value) =>
                 setEstadoCivil(value as MemberEstadoCivil)
               }
+              placeholder="Escolher"
             >
-              <SelectTrigger className="h-9 w-full">
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {ESTADO_CIVIL_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="nome-conjuge">Nome do cônjuge</Label>
-            <Input
+              {ESTADO_CIVIL_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectField>
+            <TextField
               id="nome-conjuge"
-              className="h-9 text-sm"
+              label="Nome do cônjuge"
               value={temConjuge ? nomeConjuge : ""}
               disabled={!temConjuge}
-              aria-invalid={!!errors.nomeConjuge}
+              error={errors.nomeConjuge}
+              hint={temConjuge ? undefined : "Disponível para casados ou em união estável."}
               onChange={(e) => setNomeConjuge(e.target.value)}
             />
-            {errors.nomeConjuge && (
-              <p className="text-xs text-destructive">{errors.nomeConjuge}</p>
-            )}
           </div>
         </div>
-      </FormSection>
+      </Section>
 
-      <FormSection title="Documentos">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="rg">RG</Label>
-            <Input
-              id="rg"
-              className="h-9 text-sm"
-              value={rg}
-              aria-invalid={!!errors.rg}
-              onChange={(e) => setRg(e.target.value)}
-            />
-            {errors.rg && <p className="text-xs text-destructive">{errors.rg}</p>}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="orgao-emissor">Órgão emissor</Label>
-            <Input
-              id="orgao-emissor"
-              className="h-9 text-sm"
-              value={orgaoEmissor}
-              aria-invalid={!!errors.orgaoEmissor}
-              onChange={(e) => setOrgaoEmissor(e.target.value)}
-            />
-            {errors.orgaoEmissor && (
-              <p className="text-xs text-destructive">{errors.orgaoEmissor}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label>UF do RG</Label>
-            <Select
-              items={UF_ITEMS}
-              value={rgUf}
-              onValueChange={(value) => setRgUf(value as string)}
-            >
-              <SelectTrigger className="h-9 w-full">
-                <SelectValue placeholder="UF" />
-              </SelectTrigger>
-              <SelectContent>
-                {UFS.map((sigla) => (
-                  <SelectItem key={sigla} value={sigla}>
-                    {sigla}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+      <Section title="Contato">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <TextField
+            id="telefone"
+            label="Telefone"
+            className="num"
+            inputMode="tel"
+            placeholder="(00) 00000-0000"
+            value={telefone}
+            error={errors.telefone}
+            onChange={(e) => setTelefone(formatTelefone(e.target.value))}
+          />
+          <TextField
+            id="email"
+            label="E-mail"
+            type="email"
+            value={email}
+            error={errors.email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
+      </Section>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="cpf">CPF</Label>
-            <Input
-              id="cpf"
-              className="h-9 text-sm"
-              inputMode="numeric"
-              placeholder="000.000.000-00"
-              value={cpf}
-              aria-invalid={!!errors.cpf}
-              onChange={(e) => setCpf(formatCPF(e.target.value))}
-            />
-            {errors.cpf && (
-              <p className="text-xs text-destructive">{errors.cpf}</p>
-            )}
-          </div>
-        </div>
-      </FormSection>
-
-      <FormSection title="Filiação">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="nome-mae">Nome da mãe</Label>
-            <Input
-              id="nome-mae"
-              className="h-9 text-sm"
-              value={nomeMae}
-              aria-invalid={!!errors.nomeMae}
-              onChange={(e) => setNomeMae(e.target.value)}
-            />
-            {errors.nomeMae && (
-              <p className="text-xs text-destructive">{errors.nomeMae}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="nome-pai">Nome do pai</Label>
-            <Input
-              id="nome-pai"
-              className="h-9 text-sm"
-              value={nomePai}
-              aria-invalid={!!errors.nomePai}
-              onChange={(e) => setNomePai(e.target.value)}
-            />
-            {errors.nomePai && (
-              <p className="text-xs text-destructive">{errors.nomePai}</p>
-            )}
-          </div>
-        </div>
-      </FormSection>
-
-      <FormSection title="Formação e profissão">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label>Escolaridade</Label>
-            <Select
-              items={ESCOLARIDADE_LABELS}
-              value={escolaridade}
-              onValueChange={(value) =>
-                setEscolaridade(value as MemberEscolaridade)
-              }
-            >
-              <SelectTrigger className="h-9 w-full">
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {ESCOLARIDADE_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="profissao">Profissão</Label>
-            <Input
-              id="profissao"
-              className="h-9 text-sm"
-              value={profissao}
-              aria-invalid={!!errors.profissao}
-              onChange={(e) => setProfissao(e.target.value)}
-            />
-            {errors.profissao && (
-              <p className="text-xs text-destructive">{errors.profissao}</p>
-            )}
-          </div>
-        </div>
-      </FormSection>
-
-      <FormSection title="Endereço">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="endereco">Endereço</Label>
-          <Input
+      <Section title="Endereço">
+        <div className="flex flex-col gap-5">
+          <TextField
             id="endereco"
-            className="h-9 text-sm"
+            label="Endereço"
             placeholder="Rua, número, complemento, bairro"
             value={endereco}
-            aria-invalid={!!errors.endereco}
+            error={errors.endereco}
             onChange={(e) => setEndereco(e.target.value)}
           />
-          {errors.endereco && (
-            <p className="text-xs text-destructive">{errors.endereco}</p>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="cidade">Cidade</Label>
-            <Input
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-[1fr_8rem_10rem]">
+            <TextField
               id="cidade"
-              className="h-9 text-sm"
+              label="Cidade"
               value={cidade}
-              aria-invalid={!!errors.cidade}
+              error={errors.cidade}
               onChange={(e) => setCidade(e.target.value)}
             />
-            {errors.cidade && (
-              <p className="text-xs text-destructive">{errors.cidade}</p>
-            )}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label>UF</Label>
-            <Select
+            <SelectField
+              id="uf"
+              label="UF"
               items={UF_ITEMS}
               value={uf}
-              onValueChange={(value) => setUf(value as string)}
+              onValueChange={setUf}
+              placeholder="UF"
             >
-              <SelectTrigger className="h-9 w-full">
-                <SelectValue placeholder="UF" />
-              </SelectTrigger>
-              <SelectContent>
-                {UFS.map((sigla) => (
-                  <SelectItem key={sigla} value={sigla}>
-                    {sigla}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="cep">CEP</Label>
-            <Input
+              {UFS.map((sigla) => (
+                <SelectItem key={sigla} value={sigla}>
+                  {sigla}
+                </SelectItem>
+              ))}
+            </SelectField>
+            <TextField
               id="cep"
-              className="h-9 text-sm"
+              label="CEP"
+              className="num"
               inputMode="numeric"
               placeholder="00000-000"
               value={cep}
-              aria-invalid={!!errors.cep}
+              error={errors.cep}
               onChange={(e) => setCep(formatCEP(e.target.value))}
             />
-            {errors.cep && (
-              <p className="text-xs text-destructive">{errors.cep}</p>
-            )}
           </div>
         </div>
-      </FormSection>
+      </Section>
 
-      <FormSection title="Contato">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="telefone">Telefone</Label>
-            <Input
-              id="telefone"
-              className="h-9 text-sm"
-              inputMode="tel"
-              placeholder="(00) 00000-0000"
-              value={telefone}
-              aria-invalid={!!errors.telefone}
-              onChange={(e) => setTelefone(formatTelefone(e.target.value))}
+      <Section title="Vida na igreja">
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <SelectField
+              id="cargo"
+              label="Cargo"
+              items={cargoItems}
+              value={cargoId}
+              onValueChange={setCargoId}
+              placeholder="Sem cargo"
+            >
+              {(cargos ?? []).map((cargo) => (
+                <SelectItem key={cargo.id} value={cargo.id}>
+                  {cargo.nome}
+                </SelectItem>
+              ))}
+            </SelectField>
+            <DateField
+              id="data-ingresso"
+              label="Data de ingresso na igreja"
+              value={dataIngresso}
+              onChange={setDataIngresso}
             />
-            {errors.telefone && (
-              <p className="text-xs text-destructive">{errors.telefone}</p>
-            )}
           </div>
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="email">E-mail</Label>
-            <Input
-              id="email"
-              type="email"
-              className="h-9 text-sm"
-              value={email}
-              aria-invalid={!!errors.email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            {errors.email && (
-              <p className="text-xs text-destructive">{errors.email}</p>
-            )}
-          </div>
-        </div>
-      </FormSection>
 
-      <FormSection title="Vida eclesiástica">
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="batizado-aguas"
-            checked={batizadoAguas}
-            onCheckedChange={(checked) => setBatizadoAguas(checked === true)}
-          />
-          <Label htmlFor="batizado-aguas">Batizado(a) nas águas</Label>
-        </div>
-
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <DateField
-            label="Data do batismo"
-            value={batizadoAguas ? batismoAguasData : undefined}
-            onChange={setBatismoAguasData}
-            disabled={!batizadoAguas}
-          />
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="batismo-igreja">Igreja do batismo</Label>
-            <Input
-              id="batismo-igreja"
-              className="h-9 text-sm"
-              value={batizadoAguas ? batismoAguasIgreja : ""}
-              disabled={!batizadoAguas}
-              aria-invalid={!!errors.batismoAguasIgreja}
-              onChange={(e) => setBatismoAguasIgreja(e.target.value)}
+          <div className="flex flex-col gap-1 border-t border-rule pt-4">
+            <CheckField
+              id="batizado-aguas"
+              label="Batizado(a) nas águas"
+              checked={batizadoAguas}
+              onCheckedChange={setBatizadoAguas}
             />
-            {errors.batismoAguasIgreja && (
-              <p className="text-xs text-destructive">
-                {errors.batismoAguasIgreja}
+            <div className="grid grid-cols-1 gap-5 pt-2 sm:grid-cols-2">
+              <DateField
+                id="batismo-data"
+                label="Data do batismo"
+                value={batizadoAguas ? batismoAguasData : undefined}
+                onChange={setBatismoAguasData}
+                disabled={!batizadoAguas}
+              />
+              <TextField
+                id="batismo-igreja"
+                label="Igreja do batismo"
+                value={batizadoAguas ? batismoAguasIgreja : ""}
+                disabled={!batizadoAguas}
+                error={errors.batismoAguasIgreja}
+                onChange={(e) => setBatismoAguasIgreja(e.target.value)}
+              />
+            </div>
+            {!batizadoAguas && (
+              <p className="pt-1 text-sm text-muted-foreground">
+                Marque “Batizado(a) nas águas” para preencher a data e a igreja.
               </p>
             )}
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="batizado-espirito"
-            checked={batizadoEspiritoSanto}
-            onCheckedChange={(checked) =>
-              setBatizadoEspiritoSanto(checked === true)
-            }
-          />
-          <Label htmlFor="batizado-espirito">
-            Batizado(a) no Espírito Santo
-          </Label>
-        </div>
+          <div className="border-t border-rule pt-4">
+            <CheckField
+              id="batizado-espirito"
+              label="Batizado(a) no Espírito Santo"
+              checked={batizadoEspiritoSanto}
+              onCheckedChange={setBatizadoEspiritoSanto}
+            />
+          </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <DateField
-            label="Data de ingresso na igreja"
-            value={dataIngresso}
-            onChange={setDataIngresso}
-          />
-          <div className="flex flex-col gap-2">
-            <Label>Cargo</Label>
-            <Select
-              items={cargoItems}
-              value={cargoId}
-              onValueChange={(value) => setCargoId(value as string)}
-            >
-              <SelectTrigger className="h-9 w-full">
-                <SelectValue placeholder="Selecione" />
-              </SelectTrigger>
-              <SelectContent>
-                {(cargos ?? []).map((cargo) => (
-                  <SelectItem key={cargo.id} value={cargo.id}>
-                    {cargo.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex flex-col gap-1 border-t border-rule pt-4">
+            <CheckField
+              id="ativo"
+              label="Membro ativo"
+              checked={ativo}
+              onCheckedChange={setAtivo}
+            />
+            <p className="text-sm text-muted-foreground">
+              Apenas membros ativos entram na contagem oficial exibida nas
+              informações da igreja e no relatório.
+            </p>
           </div>
         </div>
+      </Section>
 
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="ativo"
-            checked={ativo}
-            onCheckedChange={(checked) => setAtivo(checked === true)}
-          />
-          <Label htmlFor="ativo">Membro ativo</Label>
+      <Section title="Documentos">
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-[1fr_1fr_8rem]">
+            <TextField
+              id="rg"
+              label="RG"
+              className="num"
+              value={rg}
+              error={errors.rg}
+              onChange={(e) => setRg(e.target.value)}
+            />
+            <TextField
+              id="orgao-emissor"
+              label="Órgão emissor"
+              placeholder="Ex.: SSP"
+              value={orgaoEmissor}
+              error={errors.orgaoEmissor}
+              onChange={(e) => setOrgaoEmissor(e.target.value)}
+            />
+            <SelectField
+              id="rg-uf"
+              label="UF do RG"
+              items={UF_ITEMS}
+              value={rgUf}
+              onValueChange={setRgUf}
+              placeholder="UF"
+            >
+              {UFS.map((sigla) => (
+                <SelectItem key={sigla} value={sigla}>
+                  {sigla}
+                </SelectItem>
+              ))}
+            </SelectField>
+          </div>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <TextField
+              id="cpf"
+              label="CPF"
+              className="num"
+              inputMode="numeric"
+              placeholder="000.000.000-00"
+              value={cpf}
+              error={errors.cpf}
+              onChange={(e) => setCpf(formatCPF(e.target.value))}
+            />
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Apenas membros ativos entram na contagem oficial exibida nas
-          configurações e no relatório.
-        </p>
-      </FormSection>
+      </Section>
 
-      <div className="flex justify-end gap-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button type="submit" disabled={isSubmitting || enviandoFoto}>
-          {isSubmitting || enviandoFoto
-            ? "Salvando..."
-            : member
-              ? "Salvar alterações"
-              : "Cadastrar membro"}
-        </Button>
+      <Section title="Filiação">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <TextField
+            id="nome-mae"
+            label="Nome da mãe"
+            value={nomeMae}
+            error={errors.nomeMae}
+            onChange={(e) => setNomeMae(e.target.value)}
+          />
+          <TextField
+            id="nome-pai"
+            label="Nome do pai"
+            value={nomePai}
+            error={errors.nomePai}
+            onChange={(e) => setNomePai(e.target.value)}
+          />
+        </div>
+      </Section>
+
+      <Section title="Formação e profissão">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <SelectField
+            id="escolaridade"
+            label="Escolaridade"
+            items={ESCOLARIDADE_LABELS}
+            value={escolaridade}
+            onValueChange={(value) =>
+              setEscolaridade(value as MemberEscolaridade)
+            }
+            placeholder="Escolher"
+          >
+            {ESCOLARIDADE_OPTIONS.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectField>
+          <TextField
+            id="profissao"
+            label="Profissão"
+            value={profissao}
+            error={errors.profissao}
+            onChange={(e) => setProfissao(e.target.value)}
+          />
+        </div>
+      </Section>
+
+      {/* Barra de ação sempre ao alcance: fica acima da navegação no celular. */}
+      <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-20 -mr-4 -mb-6 -ml-7 border-t border-border bg-page sm:-mr-8 sm:-ml-12 lg:bottom-0 lg:-mr-10 lg:-mb-10 lg:-ml-14 lg:rounded-b-lg">
+        <div className="flex flex-col gap-2.5 py-3 pr-4 pl-7 sm:flex-row sm:items-center sm:justify-between sm:pr-8 sm:pl-12 lg:pr-10 lg:pl-14">
+          <p className="text-sm" aria-live="polite">
+            {errorCount > 0 ? (
+              <span className="font-semibold text-destructive">
+                Corrija {errorCount === 1 ? "o campo marcado" : `os ${errorCount} campos marcados`}{" "}
+                em vermelho.
+              </span>
+            ) : (
+              <span className="text-muted-foreground">
+                Só o nome completo é obrigatório.
+              </span>
+            )}
+          </p>
+          <div className="flex gap-2.5">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 sm:flex-none"
+              onClick={onCancel}
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="submit"
+              className="flex-[2] sm:flex-none"
+              disabled={salvando}
+            >
+              <CheckIcon />
+              {salvando
+                ? "Salvando..."
+                : member
+                  ? "Salvar alterações"
+                  : "Cadastrar membro"}
+            </Button>
+          </div>
+        </div>
       </div>
     </form>
   )
