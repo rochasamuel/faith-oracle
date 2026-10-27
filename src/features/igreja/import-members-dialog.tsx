@@ -7,10 +7,12 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import {
   MODEL_JSON,
@@ -55,44 +57,53 @@ export function ImportMembersDialog() {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger
-        render={<Button variant="outline" className="flex-1 sm:flex-none" />}
-      >
+      <DialogTrigger render={<Button variant="outline" />}>
         <UploadIcon />
-        Importar JSON
+        Importar lista
       </DialogTrigger>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>Importar membros via JSON</DialogTitle>
+          <DialogTitle>Importar membros de uma lista</DialogTitle>
           <DialogDescription>
-            Cole um array JSON de membros. Apenas{" "}
-            <code className="font-mono text-xs">nome_completo</code> é
-            obrigatório; datas no formato yyyy-mm-dd e cargo pelo nome (criado
-            automaticamente se não existir). Nada é importado enquanto houver
-            erros.
+            Cole a lista no formato JSON. Só o nome completo é obrigatório;
+            datas no formato ano-mês-dia (ex.: 1985-03-22) e cargo pelo nome
+            (criado sozinho se ainda não existir). Nada é importado enquanto
+            houver erros.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex justify-end">
-          <Button variant="ghost" size="sm" onClick={handleCopyModel}>
-            <CopyIcon />
-            Copiar modelo
-          </Button>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <Label htmlFor="import-membros">Lista de membros (JSON)</Label>
+            <Button variant="outline" size="sm" onClick={handleCopyModel}>
+              <CopyIcon />
+              Copiar modelo
+            </Button>
+          </div>
+          <Textarea
+            id="import-membros"
+            className="max-h-80 min-h-64 font-mono text-sm"
+            placeholder={MODEL_JSON}
+            value={text}
+            aria-invalid={errors.length > 0}
+            aria-describedby={errors.length > 0 ? "import-membros-erros" : undefined}
+            onChange={(e) => setText(e.target.value)}
+          />
         </div>
 
-        <Textarea
-          className="max-h-80 min-h-64 font-mono text-xs"
-          placeholder={MODEL_JSON}
-          value={text}
-          aria-invalid={errors.length > 0}
-          onChange={(e) => setText(e.target.value)}
-        />
-
         {errors.length > 0 && (
-          <div className="max-h-32 overflow-y-auto rounded-lg border border-destructive/30 bg-destructive/5 p-3">
-            <ul className="flex flex-col gap-1">
+          <div
+            id="import-membros-erros"
+            role="alert"
+            className="flex max-h-40 flex-col gap-1.5 overflow-y-auto rounded-lg bg-danger-soft px-4 py-3"
+          >
+            <p className="text-base font-semibold text-destructive">
+              Corrija {errors.length === 1 ? "o erro" : `os ${errors.length} erros`}{" "}
+              abaixo e tente de novo:
+            </p>
+            <ul className="flex list-disc flex-col gap-1 pl-5">
               {errors.map((error, index) => (
-                <li key={index} className="text-xs text-destructive">
+                <li key={index} className="text-sm text-destructive">
                   {error}
                 </li>
               ))}
@@ -100,7 +111,7 @@ export function ImportMembersDialog() {
           </div>
         )}
 
-        <div className="flex justify-end gap-2">
+        <DialogFooter>
           <Button
             type="button"
             variant="outline"
@@ -113,9 +124,10 @@ export function ImportMembersDialog() {
             disabled={importMembers.isPending || !text.trim()}
             onClick={handleImport}
           >
-            {importMembers.isPending ? "Importando..." : "Importar"}
+            <UploadIcon />
+            {importMembers.isPending ? "Importando..." : "Importar membros"}
           </Button>
-        </div>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

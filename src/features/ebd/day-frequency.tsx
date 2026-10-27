@@ -1,6 +1,7 @@
 import * as React from "react"
-import { CheckCheckIcon, SearchIcon } from "lucide-react"
+import { CheckCheckIcon, SearchIcon, XIcon } from "lucide-react"
 
+import { Section } from "@/components/page"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AttendanceControl } from "@/features/ebd/attendance-control"
@@ -38,84 +39,95 @@ export function DayFrequency({
     (m) => !term || normalize(m.member?.nome_completo ?? "").includes(term)
   )
 
-  const pendentes = readOnly
-    ? 0
-    : matriculas.filter(
-        (m) => m.data_matricula <= dataAulaISO && !statuses[m.id]
-      ).length
+  const aplicaveis = matriculas.filter((m) => m.data_matricula <= dataAulaISO).length
+  const depois = matriculas.length - aplicaveis
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
-        <h2 className="font-heading text-sm font-medium">
-          Frequência
-          <span className="ml-1 text-muted-foreground">
-            ({matriculas.length})
-          </span>
-          {pendentes > 0 && (
-            <span className="ml-1 text-amber-600 dark:text-amber-400">
-              · {pendentes} sem marcar
-            </span>
-          )}
-        </h2>
-        {!readOnly && (
-          <Button variant="outline" size="sm" onClick={onAllPresent}>
+    <Section
+      title="Chamada"
+      description={
+        <span className="num">
+          {aplicaveis} {aplicaveis === 1 ? "aluno" : "alunos"}
+          {depois > 0 &&
+            ` · ${depois} ${depois === 1 ? "matriculado" : "matriculados"} depois desta data`}
+        </span>
+      }
+      action={
+        !readOnly && matriculas.length > 0 ? (
+          <Button variant="outline" size="sm" className="shrink-0" onClick={onAllPresent}>
             <CheckCheckIcon />
             Todos presentes
           </Button>
-        )}
-      </div>
+        ) : undefined
+      }
+    >
+      {matriculas.length > 20 && (
+        <div className="relative">
+          <SearchIcon
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            type="search"
+            aria-label="Buscar aluno pelo nome"
+            className="pr-12 pl-11"
+            placeholder="Buscar aluno pelo nome"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          {search && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="absolute top-1 right-1"
+              aria-label="Limpar busca"
+              onClick={() => setSearch("")}
+            >
+              <XIcon />
+            </Button>
+          )}
+        </div>
+      )}
 
-      <div className="relative">
-        <SearchIcon className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          className="h-9 pl-8 text-sm"
-          placeholder="Buscar aluno..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      <div className="flex flex-col divide-y divide-border rounded-lg border border-border">
-        {visiveis.length === 0 ? (
-          <p className="p-4 text-sm text-muted-foreground">
-            Nenhum aluno encontrado.
-          </p>
-        ) : (
-          visiveis.map((m) => {
+      {visiveis.length === 0 ? (
+        <p className="py-6 text-center text-base text-muted-foreground">
+          {matriculas.length === 0
+            ? "Nenhum aluno matriculado nesta turma."
+            : `Nenhum aluno com “${search.trim()}”.`}
+        </p>
+      ) : (
+        <ol className="flex flex-col">
+          {visiveis.map((m) => {
             const naoAplicavel = m.data_matricula > dataAulaISO
-            const pendente = !readOnly && !naoAplicavel && !statuses[m.id]
+            const nome = m.member?.nome_completo ?? "—"
             return (
-              <div
+              <li
                 key={m.id}
-                className="flex items-center justify-between gap-3 p-3"
+                className="flex flex-col gap-2.5 border-b border-rule py-3.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
               >
                 <div className="min-w-0">
-                  <p className="truncate text-sm">
-                    {m.member?.nome_completo ?? "—"}
+                  <p className="text-[1.125rem] leading-snug font-semibold">
+                    {nome}
                   </p>
-                  {naoAplicavel ? (
-                    <p className="text-xs text-amber-600 dark:text-amber-400">
-                      Matriculado após esta data
+                  {naoAplicavel && (
+                    <p className="text-sm text-muted-foreground">
+                      Matriculado depois desta data
                     </p>
-                  ) : pendente ? (
-                    <p className="text-xs text-amber-600 dark:text-amber-400">
-                      Selecione a presença
-                    </p>
-                  ) : null}
+                  )}
                 </div>
-                <div className="shrink-0">
+                <div className="sm:w-[22rem] sm:shrink-0">
                   <AttendanceControl
+                    name={nome}
                     value={naoAplicavel ? "nao_aplicavel" : statuses[m.id]}
                     onChange={(status) => onChange(m.id, status)}
                     disabled={readOnly || naoAplicavel}
                   />
                 </div>
-              </div>
+              </li>
             )
-          })
-        )}
-      </div>
-    </div>
+          })}
+        </ol>
+      )}
+    </Section>
   )
 }

@@ -24,14 +24,15 @@ export function NewTransactionDialog({ size }: NewTransactionDialogProps = {}) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger render={<Button size={size} />}>
-        <PlusIcon />
+        <PlusIcon aria-hidden />
         Novo lançamento
       </DialogTrigger>
-      <DialogContent className="sm:max-w-2xl">
+      <DialogContent className="sm:max-w-xl">
         <DialogHeader>
-          <DialogTitle>Novo lançamento</DialogTitle>
+          <DialogTitle>Registrar lançamento</DialogTitle>
           <DialogDescription>
-            Registre uma entrada ou saída financeira da igreja.
+            Anote uma entrada (dízimo, oferta, doação…) ou uma saída (conta,
+            compra, ajuda) da igreja.
           </DialogDescription>
         </DialogHeader>
 

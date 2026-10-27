@@ -16,20 +16,24 @@ export function LessonContent({ markdown }: LessonContentProps) {
   if (!markdown.trim()) return null
 
   return (
-    <Collapsible className="flex flex-col gap-3">
+    <Collapsible className="flex flex-col gap-4">
       <CollapsibleTrigger
         render={
           <button
             type="button"
-            className="group flex w-fit items-center gap-1.5 font-heading text-sm font-medium"
+            className="group flex min-h-12 w-full items-center justify-between gap-3 border-b border-rule pb-2.5 text-left font-heading text-2xl font-semibold"
           >
-            Conteúdo da lição
-            <ChevronDownIcon className="size-4 text-muted-foreground transition-transform group-data-[panel-open]:rotate-180" />
+            Texto da lição
+            <span className="flex items-center gap-1.5 font-sans text-base font-semibold text-primary">
+              <span className="group-data-[panel-open]:hidden">Mostrar</span>
+              <span className="hidden group-data-[panel-open]:inline">Esconder</span>
+              <ChevronDownIcon className="size-5 transition-transform duration-200 group-data-[panel-open]:rotate-180" />
+            </span>
           </button>
         }
       />
       <CollapsibleContent>
-        <div className="prose prose-sm dark:prose-invert max-w-none">
+        <div className="prose prose-lg max-w-[68ch] dark:prose-invert prose-headings:font-heading prose-headings:font-semibold prose-p:leading-relaxed">
           <Markdown>{markdown}</Markdown>
         </div>
       </CollapsibleContent>

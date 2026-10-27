@@ -27,3 +27,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Impeccable: artefatos locais
+.impeccable/review/
+.impeccable/questions/
+.impeccable/hook.cache.json

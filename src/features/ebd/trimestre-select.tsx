@@ -10,6 +10,8 @@ import { trimestreLabel } from "@/features/ebd/constants"
 import type { EbdTurmaTrimestre } from "@/api/ebd"
 
 interface TrimestreSelectProps {
+  /** Liga o seletor a um <Label htmlFor>. */
+  id?: string
   items: EbdTurmaTrimestre[]
   value: string | null
   onValueChange: (id: string) => void
@@ -18,6 +20,7 @@ interface TrimestreSelectProps {
 
 /** Seletor do trimestre vigente (reaproveitado em Dias e Matrículas). */
 export function TrimestreSelect({
+  id,
   items,
   value,
   onValueChange,
@@ -36,7 +39,7 @@ export function TrimestreSelect({
       value={value}
       onValueChange={(v) => onValueChange(v as string)}
     >
-      <SelectTrigger className={cn("h-9 w-full sm:w-56", className)}>
+      <SelectTrigger id={id} className={cn("w-full data-[size=default]:h-12 sm:w-64", className)}>
         <SelectValue placeholder="Selecione o trimestre" />
       </SelectTrigger>
       <SelectContent>

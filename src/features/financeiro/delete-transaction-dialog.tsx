@@ -1,3 +1,6 @@
+import type { ReactNode } from "react"
+import { Trash2Icon } from "lucide-react"
+
 import {
   Dialog,
   DialogContent,
@@ -8,9 +11,13 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import type { Transaction } from "@/api/transactions"
-import { TRANSACTION_CATEGORY_LABELS } from "@/features/financeiro/constants"
+import {
+  TRANSACTION_CATEGORY_LABELS,
+  TRANSACTION_TYPE_LABELS,
+} from "@/features/financeiro/constants"
 import { formatBRL } from "@/lib/currency"
 import { dateISOToBR } from "@/lib/date"
+import { cn } from "@/lib/utils"
 
 interface DeleteTransactionDialogProps {
   transaction: Transaction | null
@@ -29,32 +36,40 @@ export function DeleteTransactionDialog({
     <Dialog open={transaction !== null} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Remover lançamento</DialogTitle>
+          <DialogTitle>Excluir este lançamento?</DialogTitle>
           <DialogDescription>
-            Esta ação não pode ser desfeita. O lançamento será removido
-            permanentemente.
+            O lançamento abaixo será apagado de vez e sai dos totais e dos
+            relatórios. Não dá para desfazer.
           </DialogDescription>
         </DialogHeader>
 
         {transaction && (
-          <div className="rounded-md border border-border bg-muted/30 p-3 text-xs">
-            <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Categoria</span>
-              <span className="font-medium">
-                {TRANSACTION_CATEGORY_LABELS[transaction.category]}
+          <dl className="flex flex-col border-t border-rule">
+            <Row label="Tipo">
+              <span
+                className={cn(
+                  "font-semibold",
+                  transaction.type === "entrada" ? "text-success" : "text-destructive"
+                )}
+              >
+                {TRANSACTION_TYPE_LABELS[transaction.type]}
               </span>
-            </div>
-            <div className="mt-1 flex justify-between gap-4">
-              <span className="text-muted-foreground">Data</span>
-              <span className="font-medium">
-                {dateISOToBR(transaction.occurred_at)}
+            </Row>
+            <Row label="Categoria">
+              {TRANSACTION_CATEGORY_LABELS[transaction.category]}
+            </Row>
+            <Row label="Data">
+              <span className="num font-type">{dateISOToBR(transaction.occurred_at)}</span>
+            </Row>
+            <Row label="Valor">
+              <span className="num font-type font-bold">
+                {formatBRL(transaction.amount)}
               </span>
-            </div>
-            <div className="mt-1 flex justify-between gap-4">
-              <span className="text-muted-foreground">Valor</span>
-              <span className="font-medium">{formatBRL(transaction.amount)}</span>
-            </div>
-          </div>
+            </Row>
+            {transaction.notes && (
+              <Row label="Observação">{transaction.notes}</Row>
+            )}
+          </dl>
         )}
 
         <DialogFooter>
@@ -63,13 +78,23 @@ export function DeleteTransactionDialog({
             onClick={() => onOpenChange(false)}
             disabled={isDeleting}
           >
-            Cancelar
+            Voltar
           </Button>
           <Button variant="destructive" onClick={onConfirm} disabled={isDeleting}>
-            {isDeleting ? "Removendo..." : "Remover"}
+            <Trash2Icon aria-hidden />
+            {isDeleting ? "Excluindo..." : "Sim, excluir lançamento"}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function Row({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div className="flex items-baseline justify-between gap-4 border-b border-rule py-2.5">
+      <dt className="text-base text-muted-foreground">{label}</dt>
+      <dd className="min-w-0 text-right text-base">{children}</dd>
+    </div>
   )
 }

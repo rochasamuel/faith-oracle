@@ -1,7 +1,7 @@
 import * as React from "react"
 import { z } from "zod"
 import { ptBR } from "date-fns/locale"
-import { CalendarIcon } from "lucide-react"
+import { CalendarIcon, SaveIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -68,65 +68,85 @@ export function CheckpointForm({ onSubmit, isSubmitting }: CheckpointFormProps) 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-      <div className="flex flex-col gap-2">
-        <Label>Data</Label>
-        <Popover open={dateOpen} onOpenChange={setDateOpen}>
-          <PopoverTrigger
-            render={
-              <Button
-                variant="outline"
-                aria-invalid={!!errors.date}
-                className={cn(
-                  "h-9 w-full justify-start gap-2 font-normal",
-                  !date && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="size-4" />
-                {date ? formatDateBR(date) : "Selecione uma data"}
-              </Button>
-            }
-          />
-          <PopoverContent className="w-auto p-0" align="start">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={(value) => {
-                setDate(value)
-                setDateOpen(false)
-              }}
-              locale={ptBR}
-              autoFocus
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6" noValidate>
+      <div className="grid gap-6 sm:grid-cols-2 sm:gap-4">
+        <div className="flex flex-col gap-2">
+          <Label id="checkpoint-date-label">Data do saldo</Label>
+          <Popover open={dateOpen} onOpenChange={setDateOpen}>
+            <PopoverTrigger
+              render={
+                <Button
+                  variant="outline"
+                  aria-labelledby="checkpoint-date-label checkpoint-date-value"
+                  aria-invalid={!!errors.date}
+                  className={cn(
+                    "w-full justify-start font-normal",
+                    !date && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon aria-hidden />
+                  <span id="checkpoint-date-value" className="num">
+                    {date ? formatDateBR(date) : "Escolha o dia"}
+                  </span>
+                </Button>
+              }
             />
-          </PopoverContent>
-        </Popover>
-        {errors.date && (
-          <p className="text-xs text-destructive">{errors.date}</p>
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="single"
+                selected={date}
+                onSelect={(value) => {
+                  setDate(value)
+                  setDateOpen(false)
+                }}
+                locale={ptBR}
+                autoFocus
+              />
+            </PopoverContent>
+          </Popover>
+          {errors.date && (
+            <p className="text-sm font-semibold text-destructive">
+              {errors.date}
+            </p>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="checkpoint-amount">Saldo real da conta</Label>
+          <CurrencyInput
+            id="checkpoint-amount"
+            className="text-lg font-semibold"
+            valueCents={amountCents}
+            onValueChange={setAmountCents}
+            aria-invalid={!!errors.amountCents}
+          />
+          {errors.amountCents && (
+            <p className="text-sm font-semibold text-destructive">
+              {errors.amountCents}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="checkpoint-notes">Observação (opcional)</Label>
+        <Input
+          id="checkpoint-notes"
+          placeholder="Ex.: conforme extrato do banco"
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          aria-invalid={!!errors.notes}
+        />
+        {errors.notes && (
+          <p className="text-sm font-semibold text-destructive">
+            {errors.notes} Use no máximo 500 caracteres.
+          </p>
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="amount">Saldo real da conta</Label>
-        <CurrencyInput
-          id="amount"
-          className="h-9 text-sm"
-          valueCents={amountCents}
-          onValueChange={setAmountCents}
-        />
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="notes">Observação (opcional)</Label>
-        <Input
-          id="notes"
-          className="h-9 text-sm"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-        />
-      </div>
-
-      <Button type="submit" disabled={isSubmitting}>
-        {isSubmitting ? "Salvando..." : "Salvar marco"}
+      <Button type="submit" disabled={isSubmitting} className="sm:w-fit sm:self-end">
+        <SaveIcon aria-hidden />
+        {isSubmitting ? "Salvando..." : "Salvar saldo inicial"}
       </Button>
     </form>
   )

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { PlusIcon, UserPlusIcon } from "lucide-react"
+import { PlusIcon, SearchIcon, UserPlusIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -7,12 +7,14 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import { dateToISO } from "@/lib/date"
 import { DateField } from "@/features/ebd/date-field"
 import { useCreateMatriculas } from "@/features/ebd/hooks"
@@ -80,6 +82,8 @@ export function MatriculaAddDialog({
     )
   }
 
+  const n = selected.size
+
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger
@@ -94,71 +98,88 @@ export function MatriculaAddDialog({
         <DialogHeader>
           <DialogTitle>Matricular membros</DialogTitle>
           <DialogDescription>
-            Selecione os membros para matricular neste trimestre.
+            Marque os membros que vão estudar nesta turma neste trimestre.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2">
-            <Label>Data da matrícula</Label>
-            <DateField value={data} onChange={setData} />
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="matricula-data">Data da matrícula</Label>
+          <DateField id="matricula-data" value={data} onChange={setData} />
+          <p className="text-sm text-muted-foreground">
+            O aluno só entra na chamada dos dias a partir desta data.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <div className="relative">
+            <SearchIcon
+              aria-hidden
+              className="pointer-events-none absolute top-1/2 left-3.5 size-5 -translate-y-1/2 text-muted-foreground"
+            />
+            <Input
+              type="search"
+              aria-label="Buscar membro pelo nome"
+              className="pl-11"
+              placeholder="Buscar membro pelo nome"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
 
-          <Input
-            className="h-9 text-sm"
-            placeholder="Buscar membro..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          <div className="max-h-72 overflow-y-auto rounded-lg border border-border">
+          <div className="max-h-[40dvh] overflow-y-auto overscroll-contain rounded-lg border border-rule">
             {isLoading ? (
-              <p className="p-4 text-sm text-muted-foreground">Carregando...</p>
+              <div className="flex flex-col">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div key={i} className="border-b border-rule px-3.5 py-3 last:border-b-0">
+                    <Skeleton className="h-6 w-2/3" />
+                  </div>
+                ))}
+              </div>
             ) : disponiveis.length === 0 ? (
-              <p className="p-4 text-sm text-muted-foreground">
-                Nenhum membro disponível para matricular.
+              <p className="px-4 py-6 text-center text-base text-muted-foreground">
+                {term
+                  ? `Nenhum membro com “${search.trim()}”.`
+                  : "Todos os membros ativos já estão matriculados."}
               </p>
             ) : (
               disponiveis.map((m) => (
                 <label
                   key={m.id}
-                  className="flex cursor-pointer items-center gap-3 border-b border-border px-3 py-2.5 text-sm last:border-b-0 hover:bg-accent"
+                  className="flex min-h-13 cursor-pointer items-center gap-3.5 border-b border-rule px-3.5 py-2.5 text-[1.0625rem] transition-colors duration-150 last:border-b-0 hover:bg-accent has-data-[checked]:bg-accent/60"
                 >
                   <Checkbox
                     checked={selected.has(m.id)}
                     onCheckedChange={() => toggle(m.id)}
                   />
-                  <span className="truncate">{m.nome_completo}</span>
+                  <span className="min-w-0 truncate">{m.nome_completo}</span>
                 </label>
               ))
             )}
           </div>
-
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs text-muted-foreground">
-              {selected.size} selecionado(s)
-            </span>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-              >
-                Cancelar
-              </Button>
-              <Button
-                type="button"
-                onClick={handleConfirm}
-                disabled={
-                  selected.size === 0 || !data || createMatriculas.isPending
-                }
-              >
-                <PlusIcon />
-                {createMatriculas.isPending ? "Matriculando..." : "Matricular"}
-              </Button>
-            </div>
-          </div>
         </div>
+
+        <DialogFooter className="sm:items-center">
+          <p className="num order-last text-base text-muted-foreground sm:order-first sm:mr-auto" aria-live="polite">
+            {n === 0
+              ? "Nenhum selecionado"
+              : `${n} ${n === 1 ? "selecionado" : "selecionados"}`}
+          </p>
+          <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            onClick={handleConfirm}
+            disabled={n === 0 || !data || createMatriculas.isPending}
+          >
+            <PlusIcon />
+            {createMatriculas.isPending
+              ? "Matriculando..."
+              : n > 1
+                ? `Matricular ${n} membros`
+                : "Matricular"}
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

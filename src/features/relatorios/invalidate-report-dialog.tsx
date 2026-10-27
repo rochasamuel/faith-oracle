@@ -1,4 +1,5 @@
 import * as React from "react"
+import { BanIcon } from "lucide-react"
 
 import {
   Dialog,
@@ -35,26 +36,27 @@ export function InvalidateReportDialog({
     <Dialog open={report !== null} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Invalidar relatório</DialogTitle>
+          <DialogTitle>Invalidar este relatório?</DialogTitle>
           <DialogDescription>
-            O relatório será marcado como invalidado (soft delete) e mantido
-            para auditoria. Ele não poderá mais ser considerado válido.
+            O relatório fica marcado como invalidado e continua guardado para
+            consulta, mas deixa de valer como prestação de contas. Isso não
+            pode ser desfeito.
           </DialogDescription>
         </DialogHeader>
 
         {report && (
-          <div className="rounded-md border border-border bg-muted/30 p-3 text-xs">
-            <div className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Relatório</span>
-              <span className="font-medium">{report.title}</span>
+          <dl className="flex flex-col border-t border-rule text-base">
+            <div className="flex flex-col gap-0.5 border-b border-rule py-2.5 sm:flex-row sm:justify-between sm:gap-4">
+              <dt className="text-muted-foreground">Relatório</dt>
+              <dd className="font-semibold sm:text-right">{report.title}</dd>
             </div>
-            <div className="mt-1 flex justify-between gap-4">
-              <span className="text-muted-foreground">Referência</span>
-              <span className="font-medium">
+            <div className="flex flex-col gap-0.5 border-b border-rule py-2.5 sm:flex-row sm:justify-between sm:gap-4">
+              <dt className="text-muted-foreground">Referência</dt>
+              <dd className="font-semibold sm:text-right">
                 {formatReferenceLabel(report)}
-              </span>
+              </dd>
             </div>
-          </div>
+          </dl>
         )}
 
         <div className="flex flex-col gap-2">
@@ -74,14 +76,15 @@ export function InvalidateReportDialog({
             onClick={() => onOpenChange(false)}
             disabled={isInvalidating}
           >
-            Cancelar
+            Voltar
           </Button>
           <Button
             variant="destructive"
             onClick={() => onConfirm(reason.trim())}
             disabled={isInvalidating}
           >
-            {isInvalidating ? "Invalidando..." : "Invalidar"}
+            <BanIcon />
+            {isInvalidating ? "Invalidando..." : "Sim, invalidar relatório"}
           </Button>
         </DialogFooter>
       </DialogContent>

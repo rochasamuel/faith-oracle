@@ -14,19 +14,9 @@ export const REPORT_PERIOD_TYPE_LABELS: Record<ReportPeriodType, string> = {
 
 export const REPORT_STATUS_LABELS: Record<ReportStatus, string> = {
   processando: "Processando",
-  concluido: "Concluído",
+  concluido: "Conferido",
   erro: "Erro",
   invalidado: "Invalidado",
-}
-
-/** Classes de cor (tom claro) por status, para badges. */
-export const REPORT_STATUS_CLASSES: Record<ReportStatus, string> = {
-  processando:
-    "border-amber-500/30 bg-amber-500/10 text-amber-600 dark:text-amber-400",
-  concluido:
-    "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  erro: "border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400",
-  invalidado: "border-border bg-muted text-muted-foreground",
 }
 
 /** Rótulo do período de referência: "Maio de 2026" ou "Ano de 2026". */

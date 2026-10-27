@@ -1,5 +1,12 @@
 import * as React from "react"
-import { CheckIcon, PencilIcon, Trash2Icon, XIcon } from "lucide-react"
+import {
+  BriefcaseIcon,
+  CheckIcon,
+  PencilIcon,
+  PlusIcon,
+  Trash2Icon,
+  XIcon,
+} from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -11,6 +18,8 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Skeleton } from "@/components/ui/skeleton"
 import type { MemberCargo } from "@/api/members"
 import {
   useCargos,
@@ -19,7 +28,7 @@ import {
   useUpdateCargo,
 } from "@/features/igreja/use-members"
 
-/** Linha da lista: exibição com ações ou edição inline do nome. */
+/** Linha pautada: exibição com ações ou edição do nome no lugar. */
 function CargoRow({ cargo }: { cargo: MemberCargo }) {
   const updateCargo = useUpdateCargo()
   const deleteCargo = useDeleteCargo()
@@ -39,11 +48,16 @@ function CargoRow({ cargo }: { cargo: MemberCargo }) {
     )
   }
 
+  function handleCancel() {
+    setEditing(false)
+    setNome(cargo.nome)
+  }
+
   if (editing) {
     return (
-      <div className="flex items-center gap-2">
+      <li className="flex items-center gap-2 border-b border-rule py-2.5">
         <Input
-          className="h-8 text-sm"
+          aria-label={`Novo nome para o cargo ${cargo.nome}`}
           value={nome}
           autoFocus
           onChange={(e) => setNome(e.target.value)}
@@ -52,59 +66,53 @@ function CargoRow({ cargo }: { cargo: MemberCargo }) {
               e.preventDefault()
               handleSave()
             }
-            if (e.key === "Escape") {
-              setEditing(false)
-              setNome(cargo.nome)
-            }
+            if (e.key === "Escape") handleCancel()
           }}
         />
         <Button
           variant="ghost"
-          size="icon-sm"
-          aria-label="Salvar cargo"
+          size="icon"
+          aria-label="Salvar nome do cargo"
           disabled={updateCargo.isPending}
           onClick={handleSave}
         >
-          <CheckIcon className="text-muted-foreground" />
+          <CheckIcon className="text-success" />
         </Button>
         <Button
           variant="ghost"
-          size="icon-sm"
+          size="icon"
           aria-label="Cancelar edição"
-          onClick={() => {
-            setEditing(false)
-            setNome(cargo.nome)
-          }}
+          onClick={handleCancel}
         >
           <XIcon className="text-muted-foreground" />
         </Button>
-      </div>
+      </li>
     )
   }
 
   return (
-    <div className="flex items-center justify-between gap-2">
-      <span className="text-sm">{cargo.nome}</span>
+    <li className="flex min-h-14 items-center justify-between gap-2 border-b border-rule py-1.5">
+      <span className="text-base font-semibold">{cargo.nome}</span>
       <div className="flex items-center gap-1">
         <Button
           variant="ghost"
-          size="icon-sm"
-          aria-label="Renomear cargo"
+          size="icon"
+          aria-label={`Renomear cargo ${cargo.nome}`}
           onClick={() => setEditing(true)}
         >
           <PencilIcon className="text-muted-foreground" />
         </Button>
         <Button
           variant="ghost"
-          size="icon-sm"
-          aria-label="Remover cargo"
+          size="icon"
+          aria-label={`Remover cargo ${cargo.nome}`}
           disabled={deleteCargo.isPending}
           onClick={() => deleteCargo.mutate(cargo.id)}
         >
-          <Trash2Icon className="text-muted-foreground" />
+          <Trash2Icon className="text-destructive" />
         </Button>
       </div>
-    </div>
+    </li>
   )
 }
 
@@ -122,55 +130,62 @@ export function CargoManagerDialog() {
 
   return (
     <Dialog>
-      <DialogTrigger
-        render={<Button variant="outline" className="flex-1 sm:flex-none" />}
-      >
+      <DialogTrigger render={<Button variant="outline" />}>
+        <BriefcaseIcon />
         Gerenciar cargos
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Cargos</DialogTitle>
+          <DialogTitle>Gerenciar cargos</DialogTitle>
           <DialogDescription>
-            Cargos eclesiásticos atribuíveis aos membros. Ao remover um cargo,
-            os membros que o possuíam ficam sem cargo.
+            Cargos que podem ser dados aos membros. Ao remover um cargo, os
+            membros que o tinham ficam sem cargo.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex items-center gap-2">
-          <Input
-            className="h-9 text-sm"
-            placeholder="Novo cargo"
-            value={novoNome}
-            onChange={(e) => setNovoNome(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault()
-                handleCreate()
-              }
-            }}
-          />
-          <Button
-            size="sm"
-            disabled={createCargo.isPending || !novoNome.trim()}
-            onClick={handleCreate}
-          >
-            {createCargo.isPending ? "Adicionando..." : "Adicionar"}
-          </Button>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="novo-cargo">Novo cargo</Label>
+          <div className="flex items-center gap-2">
+            <Input
+              id="novo-cargo"
+              placeholder="Ex.: Diácono"
+              value={novoNome}
+              onChange={(e) => setNovoNome(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault()
+                  handleCreate()
+                }
+              }}
+            />
+            <Button
+              disabled={createCargo.isPending || !novoNome.trim()}
+              onClick={handleCreate}
+            >
+              <PlusIcon />
+              {createCargo.isPending ? "Adicionando..." : "Adicionar"}
+            </Button>
+          </div>
         </div>
 
-        <div className="flex max-h-72 flex-col gap-1 overflow-y-auto">
+        <div className="max-h-80 overflow-y-auto">
           {isLoading ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">
-              Carregando...
-            </p>
+            <div className="flex flex-col gap-2">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
           ) : (cargos ?? []).length === 0 ? (
-            <p className="py-4 text-center text-sm text-muted-foreground">
-              Nenhum cargo cadastrado.
+            <p className="py-6 text-center text-base text-muted-foreground">
+              Nenhum cargo cadastrado. Escreva o nome acima e toque em
+              “Adicionar”.
             </p>
           ) : (
-            (cargos ?? []).map((cargo) => (
-              <CargoRow key={cargo.id} cargo={cargo} />
-            ))
+            <ul className="flex flex-col border-t border-rule">
+              {(cargos ?? []).map((cargo) => (
+                <CargoRow key={cargo.id} cargo={cargo} />
+              ))}
+            </ul>
           )}
         </div>
       </DialogContent>

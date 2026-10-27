@@ -1,10 +1,4 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Page, PageHeader } from "@/components/page"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ChurchInfoForm } from "@/features/igreja/church-info-form"
 import { toChurchView } from "@/features/igreja/church-view"
@@ -18,46 +12,48 @@ export default function InformacoesPage() {
   const upsert = useUpsertChurchInfo()
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6 p-4 sm:p-6">
-      <div>
-        <h1 className="font-heading text-lg font-medium">
-          Informações da igreja
-        </h1>
-        <p className="text-xs text-muted-foreground">
-          Dados institucionais usados no cabeçalho e no rodapé do relatório em
-          PDF. Alterações aqui passam a valer nos próximos relatórios gerados.
-        </p>
-      </div>
+    <Page width="narrow">
+      <PageHeader
+        title="Informações da igreja"
+        description="Dados institucionais usados no cabeçalho e no rodapé do relatório em PDF. As alterações passam a valer nos próximos relatórios gerados."
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Dados da igreja</CardTitle>
-          <CardDescription>
-            Edite e salve. Os campos já vêm preenchidos com os dados atuais.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <Skeleton className="h-96 w-full" />
-          ) : (
-            <>
-              {isError && (
-                <p className="mb-4 text-xs text-destructive">
-                  Não foi possível carregar do servidor; exibindo os valores
-                  padrão.
-                </p>
-              )}
-              <ChurchInfoForm
-                defaultValues={toChurchView(data ?? null)}
-                isSubmitting={upsert.isPending}
-                onSubmit={async (payload) => {
-                  await upsert.mutateAsync(payload)
-                }}
-              />
-            </>
+      {isLoading ? (
+        <div className="flex flex-col gap-8">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex flex-col gap-4">
+              <Skeleton className="h-8 w-48" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <>
+          {isError && (
+            <div
+              role="alert"
+              className="flex flex-col gap-1 rounded-lg bg-warning-soft px-5 py-4"
+            >
+              <p className="text-base font-semibold text-warning">
+                Não foi possível carregar os dados salvos.
+              </p>
+              <p className="text-base text-foreground/80">
+                Os campos abaixo mostram os valores padrão. Verifique a
+                internet e recarregue a página antes de salvar, para não
+                substituir os dados atuais.
+              </p>
+            </div>
           )}
-        </CardContent>
-      </Card>
-    </div>
+          <ChurchInfoForm
+            defaultValues={toChurchView(data ?? null)}
+            isSubmitting={upsert.isPending}
+            onSubmit={async (payload) => {
+              await upsert.mutateAsync(payload)
+            }}
+          />
+        </>
+      )}
+    </Page>
   )
 }

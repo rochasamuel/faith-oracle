@@ -22,13 +22,13 @@ export function CurrencyInput({
 }: CurrencyInputProps) {
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute top-1/2 left-2 -translate-y-1/2 text-xs text-muted-foreground">
+      <span className="pointer-events-none absolute top-1/2 left-3.5 -translate-y-1/2 text-base font-semibold text-muted-foreground">
         R$
       </span>
       <Input
         inputMode="numeric"
         placeholder={placeholder}
-        className={cn("pl-8", className)}
+        className={cn("num pl-11", className)}
         value={
           valueCents === 0
             ? ""
